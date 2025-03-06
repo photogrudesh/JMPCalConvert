@@ -1,4 +1,6 @@
+streamlit
 openpyxl
 icalendar
 datetime
 parsedatetime
+re
