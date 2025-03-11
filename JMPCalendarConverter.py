@@ -20,6 +20,8 @@ def main():
 
     if not use_latest:
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
+    else:
+        st.text("Suggested date range to update: 31/03/2025-04/04/2025")
 
     if file:
         # process file and determine which date ranges are valid
