@@ -27,7 +27,7 @@ def main():
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
     else:
         st.text("Suggested date range to update: 1/04/2025-03/04/2025")
-        autofill = st.checkbox("Apply suggested updates")
+        autofill = st.button("Apply suggested updates")
         if autofill:
             suggested_start = datetime.date(2025, 4, 1)
             suggested_end = datetime.date(2025, 4, 3)
