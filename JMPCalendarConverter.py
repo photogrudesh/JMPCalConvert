@@ -25,9 +25,9 @@ def main():
         st.divider()
         st.subheader("Options")
         if not st.checkbox("Import all"):
-            date_start = st.date_input("Date to import from", value="today", min_value=None, max_value=None,
+            date_start = st.date_input("Date to import from (non-inclusive)", value="today", min_value=None, max_value=None,
                                        format="DD/MM/YYYY", key="dsi")
-            date_end = st.date_input("Last date to import", value="today", min_value=None, max_value=None,
+            date_end = st.date_input("Last date to import (non-inclusive)", value="today", min_value=None, max_value=None,
                                      format="DD/MM/YYYY", key="dei")
 
         pbl = st.text_input("PBL group", value="")
@@ -37,7 +37,7 @@ def main():
         go = st.button("Start converting")
 
         if pbl and clin and campus and go:
-            saved = process_xlsx(pbl, clin, campus, ws)
+            saved = process_xlsx(pbl.upper(), clin, campus, ws)
             generate_cal(saved, date_start, date_end)
 
             if os.path.exists("calendar.ics"):
