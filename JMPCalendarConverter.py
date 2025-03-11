@@ -15,13 +15,14 @@ def main():
     st.divider()
     st.subheader("Upload xlsx")
 
-    suggested_start = "today"
-    suggested_end = "today"
-
     use_latest = st.checkbox("Use latest year 1 timetable (last updated: 18:26 11/03/2025)")
     file = "MEDI1101 11032025.xlsx"
 
-    autofill = False
+    date_start = datetime.date(1970, 1, 1)
+    date_end = datetime.date(3000, 1, 1)
+
+    suggested_start = "today"
+    suggested_end = "today"
 
     if not use_latest:
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
