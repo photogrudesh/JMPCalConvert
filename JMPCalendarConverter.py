@@ -41,6 +41,12 @@ def main():
 
         go = st.button("Start converting")
 
+        try:
+            clint = int(clin)
+        except TypeError:
+            clin = None
+            st.error("Make sure your clin group is a number.")
+
         if pbl and clin and campus and go:
             saved = process_xlsx(pbl.upper(), clin, campus, ws)
             generate_cal(saved, date_start, date_end)
