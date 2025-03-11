@@ -15,28 +15,34 @@ def main():
     st.divider()
     st.subheader("Upload xlsx")
 
+    suggested_start = "today"
+    suggested_end = "today"
+
     use_latest = st.checkbox("Use latest year 1 timetable (last updated: 18:26 11/03/2025)")
     file = "MEDI1101 11032025.xlsx"
+
+    autofill = False
 
     if not use_latest:
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
     else:
         st.text("Suggested date range to update: 1/04/2025-03/04/2025")
+        autofill = st.checkbox("Apply suggested updates")
+        if autofill:
+            suggested_start = datetime.date(2025, 4, 1)
+            suggested_end = datetime.date(2025, 4, 3)
 
     if file:
         # process file and determine which date ranges are valid
         wb = openpyxl.load_workbook(file)
         ws = wb.active
 
-        date_start = datetime.date(1970, 1, 1)
-        date_end = datetime.date(3000, 1, 1)
-
         st.divider()
         st.subheader("Options")
-        if not st.checkbox("Import all"):
-            date_start = st.date_input("Date to import from (inclusive)", value="today", min_value=None, max_value=None,
+        if not st.checkbox("Import all") and not autofill:
+            date_start = st.date_input("Date to import from (inclusive)", value=suggested_start, min_value=None, max_value=None,
                                        format="DD/MM/YYYY", key="dsi")
-            date_end = st.date_input("Last date to import (inclusive)", value="today", min_value=None, max_value=None,
+            date_end = st.date_input("Last date to import (inclusive)", value=suggested_end, min_value=None, max_value=None,
                                      format="DD/MM/YYYY", key="dei")
 
         pbl = st.text_input("PBL group", value="")
