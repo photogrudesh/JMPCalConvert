@@ -14,7 +14,7 @@ def main():
     st.subheader("Upload xlsx")
 
     use_latest = st.checkbox("Use latest (last updated: 18:26 11/03/2025)")
-    file = open("MEDI1101 11032025.xlsx", "r")
+    file = "MEDI1101 11032025.xlsx"
 
     if not use_latest:
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
