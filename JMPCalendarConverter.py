@@ -21,7 +21,7 @@ def main():
     if not use_latest:
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
     else:
-        st.text("Suggested date range to update: 31/03/2025-04/04/2025")
+        st.text("Suggested date range to update: 1/04/2025-03/04/2025")
 
     if file:
         # process file and determine which date ranges are valid
@@ -34,9 +34,9 @@ def main():
         st.divider()
         st.subheader("Options")
         if not st.checkbox("Import all"):
-            date_start = st.date_input("Date to import from (non-inclusive)", value="today", min_value=None, max_value=None,
+            date_start = st.date_input("Date to import from (inclusive)", value="today", min_value=None, max_value=None,
                                        format="DD/MM/YYYY", key="dsi")
-            date_end = st.date_input("Last date to import (non-inclusive)", value="today", min_value=None, max_value=None,
+            date_end = st.date_input("Last date to import (inclusive)", value="today", min_value=None, max_value=None,
                                      format="DD/MM/YYYY", key="dei")
 
         pbl = st.text_input("PBL group", value="")
@@ -116,7 +116,7 @@ def generate_cal(events, date_start, date_end):
     cal.add("summary", "JMP schedule")
 
     for i in events:
-        if date_start < i[3].date() < date_end:
+        if date_start - 1 < i[3].date() < date_end + 1:
             event = Event()
             no_time = False
 
