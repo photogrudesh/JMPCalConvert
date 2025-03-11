@@ -39,7 +39,7 @@ def main():
 
         st.divider()
         st.subheader("Options")
-        if not st.checkbox("Import all") and not autofill:
+        if not st.checkbox("Import all"):
             date_start = st.date_input("Date to import from (inclusive)", value=suggested_start, min_value=None, max_value=None,
                                        format="DD/MM/YYYY", key="dsi")
             date_end = st.date_input("Last date to import (inclusive)", value=suggested_end, min_value=None, max_value=None,
