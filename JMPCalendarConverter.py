@@ -116,7 +116,7 @@ def generate_cal(events, date_start, date_end):
     cal.add("summary", "JMP schedule")
 
     for i in events:
-        if date_start < i[3].date() < date_end:
+        if date_start - datetime.timedelta(days=1) < i[3].date() < date_end + datetime.timedelta(days=1):
             event = Event()
             no_time = False
 
