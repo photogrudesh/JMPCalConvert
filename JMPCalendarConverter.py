@@ -32,6 +32,9 @@ def main():
         if autofill:
             suggested_start = datetime.date(2025, 4, 1)
             suggested_end = datetime.date(2025, 4, 3)
+        else:
+            suggested_start = "today"
+            suggested_end = "today"
 
     if file:
         # process file and determine which date ranges are valid
