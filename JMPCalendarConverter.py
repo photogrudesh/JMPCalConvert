@@ -13,7 +13,7 @@ def main():
     st.divider()
     st.subheader("Upload xlsx")
 
-    use_latest = st.checkbox("Use latest (last updated: 18:26 11/03/2025)")
+    use_latest = st.checkbox("Use latest year 1 timetable (last updated: 18:26 11/03/2025)")
     file = "MEDI1101 11032025.xlsx"
 
     if not use_latest:
