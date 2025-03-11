@@ -9,10 +9,11 @@ import re
 
 
 def main():
+    st.set_page_config(page_title="JMPCalendarConverter")
+
     st.title("JMPCalendarConverter")
     st.divider()
     st.subheader("Upload xlsx")
-    # st.set_page_config(page_title="JMPCalendarConverter")
 
     use_latest = st.checkbox("Use latest year 1 timetable (last updated: 18:26 11/03/2025)")
     file = "MEDI1101 11032025.xlsx"
