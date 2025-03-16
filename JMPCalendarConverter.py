@@ -27,11 +27,11 @@ def main():
     if not use_latest:
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
     else:
-        st.text("Suggested date range to update: 1/04/2025-03/04/2025")
+        st.text("Suggested date range to update for Callaghan: 1/04/2025-03/04/2025")
         autofill = st.button("Apply suggested updates")
         if autofill:
-            suggested_start = datetime.date(2025, 4, 1)
-            suggested_end = datetime.date(2025, 4, 3)
+            suggested_start = datetime.date(2025, 3, 20)
+            suggested_end = datetime.date(2025, 3, 26)
 
     if file:
         # process file and determine which date ranges are valid
