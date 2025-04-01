@@ -103,7 +103,7 @@ def main():
             with col11:
                 go = st.button("Start converting", use_container_width=True)
         else:
-            st.warning(f"Select which timetable to convert.")
+            st.warning(f"Select your timetable.")
 
         if pbl and clin and campus and go and valid_selection:
             saved = process_xlsx(pbl.upper(), clin, campus, ws)
