@@ -28,8 +28,17 @@ def main():
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
     else:
         st.text("Suggested date range to update for Callaghan: 06/04/2025-12/04/2025")
-        autofill = st.button("Apply suggested updates")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            autofill = st.button("Apply suggested updates")
+        with col2:
+            current_week = st.button("Update current week")
+
         if autofill:
+            suggested_start = datetime.date(2025, 4, 6)
+            suggested_end = datetime.date(2025, 4, 12)
+        if current_week:
             suggested_start = datetime.date(2025, 4, 6)
             suggested_end = datetime.date(2025, 4, 12)
 
@@ -40,14 +49,28 @@ def main():
 
         st.divider()
         st.subheader("Options")
-        if not st.checkbox("Import all"):
-            date_start = st.date_input("Date to import from (inclusive)", value=suggested_start, min_value=None, max_value=None,
-                                       format="DD/MM/YYYY", key="dsi")
-            date_end = st.date_input("Last date to import (inclusive)", value=suggested_end, min_value=None, max_value=None,
-                                     format="DD/MM/YYYY", key="dei")
+        column1, column2 = st.columns(2)
 
-        pbl = st.selectbox("PBL group", ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"), index=None, placeholder="Select PBL group")
-        clin = st.selectbox("Clinical group", ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"), index=None, placeholder="Select clinical group")
+        if not st.checkbox("Import all"):
+            with column1:
+                date_start = st.date_input("Date to import from (inclusive)", value=suggested_start, min_value=None,
+                                           max_value=None,
+                                           format="DD/MM/YYYY", key="dsi")
+            with column2:
+                date_end = st.date_input("Last date to import (inclusive)", value=suggested_end, min_value=None,
+                                         max_value=None,
+                                         format="DD/MM/YYYY", key="dei")
+
+        with column1:
+            pbl = st.selectbox("PBL group", (
+                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"),
+                               index=None,
+                               placeholder="Select PBL group")
+        with column2:
+            clin = st.selectbox("Clinical group", (
+                "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
+                "20"), index=None, placeholder="Select clinical group")
+
         campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
 
         valid_selection = True
@@ -57,7 +80,8 @@ def main():
                 if pbl not in ["E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"]:
                     st.error(f"Callaghan does not have PBL group {pbl}")
                     valid_selection = False
-                if clin not in ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]:
+                if clin not in ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
+                                "20"]:
                     st.error(f"Callaghan does not have clinical group {clin}")
                     valid_selection = False
             elif campus == "Central Coast":
@@ -169,7 +193,6 @@ def generate_cal(events, date_start, date_end):
 
 
 def convert_datetime(date, time):
-
     time = time.replace(".", ":").replace("md", "pm")
 
     times = time.split(" - ")
