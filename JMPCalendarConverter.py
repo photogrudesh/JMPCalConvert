@@ -46,20 +46,31 @@ def main():
             date_end = st.date_input("Last date to import (inclusive)", value=suggested_end, min_value=None, max_value=None,
                                      format="DD/MM/YYYY", key="dei")
 
-        pbl = st.text_input("PBL group", value="")
-        clin = st.text_input("Clinical group", value="")
+        pbl = st.selectbox("PBL group", ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"), index=None, placeholder="Select PBL group")
+        clin = st.selectbox("Clinical group", ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"), index=None, placeholder="Select clinical group")
         campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
 
         go = st.button("Start converting")
 
-        if clin:
-            try:
-                int(clin)
-            except ValueError:
-                clin = None
-                st.error("Make sure your clin group is a number.")
+        valid_selection = True
 
-        if pbl and clin and campus and go:
+        if pbl and clin and campus:
+            if campus == "Callaghan":
+                if pbl not in ["E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"]:
+                    st.error(f"Callaghan does not have PBL group {pbl}")
+                    valid_selection = False
+                if clin not in ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]:
+                    st.error(f"Callaghan does not have clinical group {clin}")
+                    valid_selection = False
+            elif campus == "Central Coast":
+                if pbl not in ["A", "B", "C", "D"]:
+                    st.error(f"Callaghan does not have PBL group {pbl}")
+                    valid_selection = False
+                if clin not in ["1", "2", "3", "4"]:
+                    st.error(f"Callaghan does not have clinical group {clin}")
+                    valid_selection = False
+
+        if pbl and clin and campus and go and valid_selection:
             saved = process_xlsx(pbl.upper(), clin, campus, ws)
             generate_cal(saved, date_start, date_end)
 
