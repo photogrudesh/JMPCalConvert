@@ -28,7 +28,7 @@ def main():
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
     else:
         st.text("Suggested date range to update for Callaghan: 06/04/2025-12/04/2025")
-        col1, col2 = st.columns(2)
+        col1, col2, col3, col4 = st.columns([1, 1, 2, 2])
 
         with col1:
             autofill = st.button("Apply suggested updates")
