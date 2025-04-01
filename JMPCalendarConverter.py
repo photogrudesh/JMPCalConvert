@@ -28,12 +28,12 @@ def main():
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
     else:
         st.text("Suggested date range to update for Callaghan: 06/04/2025-12/04/2025")
-        col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+        col1, col2 = st.columns(2)
 
         with col1:
-            autofill = st.button("Apply suggested updates")
+            autofill = st.button("Apply suggested updates", use_container_width=True)
         with col2:
-            current_week = st.button("Update current week")
+            current_week = st.button("Update current week", use_container_width=True)
 
         if autofill:
             suggested_start = datetime.date(2025, 4, 6)
@@ -97,8 +97,13 @@ def main():
 
         go = False
 
+        col11, col12 = st.columns(2)
+
         if valid_selection:
-            go = st.button("Start converting")
+            with col11:
+                go = st.button("Start converting", use_container_width=True)
+        else:
+            st.warning(f"Select which timetable to convert.")
 
         if pbl and clin and campus and go and valid_selection:
             saved = process_xlsx(pbl.upper(), clin, campus, ws)
@@ -106,7 +111,9 @@ def main():
 
             if os.path.exists("calendar.ics"):
                 f = open("calendar.ics", "r")
-                st.download_button("Download ics file", data=f, file_name="Calendar.ics")
+
+                with col12:
+                    st.download_button("Download ics file", data=f, file_name="Calendar.ics", use_container_width=True)
 
                 st.text("Import this file to your calendar app (google calendar works idk about the rest)")
 
