@@ -50,10 +50,10 @@ def main():
         st.divider()
         st.subheader("Options")
 
-        import_all = st.checkbox("Import all", key="importcheck")
+        import_all = st.checkbox("Import all", key="importcheck", value=False)
 
         if autofill or current_week:
-            st.session_state.importcheck = False
+            st.rerun()
 
         column1, column2 = st.columns(2)
 
