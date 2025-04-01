@@ -99,7 +99,7 @@ def main():
 
         col11, col12 = st.columns(2)
 
-        if valid_selection:
+        if valid_selection and pbl and clin and campus:
             with col11:
                 go = st.button("Start converting", use_container_width=True)
         else:
