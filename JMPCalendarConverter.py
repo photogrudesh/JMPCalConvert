@@ -64,10 +64,10 @@ def main():
                     valid_selection = False
             elif campus == "Central Coast":
                 if pbl not in ["A", "B", "C", "D"]:
-                    st.error(f"Callaghan does not have PBL group {pbl}")
+                    st.error(f"Central Coast does not have PBL group {pbl}")
                     valid_selection = False
                 if clin not in ["1", "2", "3", "4"]:
-                    st.error(f"Callaghan does not have clinical group {clin}")
+                    st.error(f"Central Coast does not have clinical group {clin}")
                     valid_selection = False
 
         if pbl and clin and campus and go and valid_selection:
