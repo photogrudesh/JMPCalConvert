@@ -49,9 +49,12 @@ def main():
 
         st.divider()
         st.subheader("Options")
+
+        import_all = st.checkbox("Import all")
+
         column1, column2 = st.columns(2)
 
-        if not st.checkbox("Import all"):
+        if not import_all:
             with column1:
                 date_start = st.date_input("Date to import from (inclusive)", value=suggested_start, min_value=None,
                                            max_value=None,
