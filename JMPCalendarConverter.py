@@ -115,7 +115,7 @@ def main():
                 with col12:
                     st.download_button("Download ics file", data=f, file_name="Calendar.ics", use_container_width=True)
 
-                st.text("Import this file to your calendar app (google calendar works idk about the rest)")
+                st.text("Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. DM me @photogrudesh on Instagram if there are any issues.")
 
 
 def process_xlsx(pbl, clin, campus, ws):
