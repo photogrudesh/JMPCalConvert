@@ -15,8 +15,8 @@ def main():
     st.divider()
     st.subheader("Upload xlsx")
 
-    use_latest = st.checkbox("Use latest year 1 timetable (last updated: 16:32 01/04/2025)", value=True)
-    file = "MEDI1101 01042025.xlsx"
+    use_latest = st.checkbox("Use latest year 1 timetable (last updated: 14:58 24/04/2025)", value=True)
+    file = "MEDI1101 24042025.xlsx"
 
     date_start = datetime.date(1970, 1, 1)
     date_end = datetime.date(3000, 1, 1)
@@ -27,7 +27,7 @@ def main():
     if not use_latest:
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
     else:
-        st.text("Suggested date range to update for Callaghan: 06/04/2025-12/04/2025")
+        st.text("Suggested date range to update for Callaghan: 28/04/2025-13/06/2025")
         col1, col2 = st.columns(2)
 
         with col1:
@@ -36,11 +36,11 @@ def main():
             current_week = st.button("Update current week", use_container_width=True)
 
         if autofill:
-            suggested_start = datetime.date(2025, 4, 6)
-            suggested_end = datetime.date(2025, 4, 12)
+            suggested_start = datetime.date(2025, 4, 28)
+            suggested_end = datetime.date(2025, 6, 13)
         if current_week:
-            suggested_start = datetime.date(2025, 4, 6)
-            suggested_end = datetime.date(2025, 4, 12)
+            suggested_start = datetime.date(2025, 4, 28)
+            suggested_end = datetime.date(2025, 5, 2)
 
     if file:
         # process file and determine which date ranges are valid
