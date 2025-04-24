@@ -148,7 +148,7 @@ def process_xlsx(pbl, clin, campus, ws):
             if bool(re.search(rf'(?<!\d){clin}(?!\d)', students)):
                 keep = True
 
-        if "Zoom" in i[7]:
+        if "Zoom" in str(i[7]):
             try:
                 i[7] = ws.cell(row=row_num, column=8).hyperlink.target
             except AttributeError:
