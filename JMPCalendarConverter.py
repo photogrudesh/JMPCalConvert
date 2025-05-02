@@ -166,7 +166,7 @@ def process_xlsx(pbl, clin, campus, ws):
 
 def generate_cal(events, date_start, date_end):
     cal = Calendar()
-    cal.add('version', '2.0')
+    cal['version'] = '2.0'
     cal.add("prodid", "-//photogrudesh//JMPCalendarConverter//EN")
     cal.add("summary", "JMP schedule")
 
