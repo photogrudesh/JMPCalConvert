@@ -62,8 +62,6 @@ def main():
                 date_end = st.date_input("Last date to import (inclusive)", value=suggested_end, min_value=None,
                                          max_value=None,
                                          format="DD/MM/YYYY", key="dei")
-        elif import_all:
-            st.text(f"Importing all available events from {file}")
         elif import_suggested:
             st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
             date_start = False
@@ -81,6 +79,11 @@ def main():
                 "20"), index=None, placeholder="Select clinical group")
 
         campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
+
+        if import_all:
+            st.text(f"Importing all available events from {file}")
+        elif import_suggested:
+            st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
 
         valid_selection = True
 
