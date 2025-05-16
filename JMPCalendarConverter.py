@@ -46,10 +46,12 @@ def main():
         st.divider()
         st.subheader("Options")
 
-        import_all = st.checkbox("Import all", key="importcheck")
-        import_suggested = st.checkbox("Import suggested dates", key="suggested_check")
-
         column1, column2 = st.columns(2)
+
+        with column1:
+            import_all = st.checkbox("Import all", key="importcheck")
+        with column2:
+            import_suggested = st.checkbox("Import suggested dates", key="suggested_check")
 
         if not import_all and not import_suggested:
             with column1:
