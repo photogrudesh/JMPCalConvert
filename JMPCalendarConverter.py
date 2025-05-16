@@ -67,6 +67,8 @@ def main():
             st.text(f"Importing all available events from {file}")
         elif option == "Suggested dates":
             st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
+        elif option == "Current week":
+            st.text("Importing JMP week 12: 19/05/2025-23/05/2025")
 
         valid_selection = True
 
