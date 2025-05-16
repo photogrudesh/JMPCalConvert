@@ -160,7 +160,6 @@ def process_xlsx(pbl, clin, campus, ws):
         if keep:
             saved.append(i)
         row_num += 1
-        print(i)
 
     return saved
 
@@ -198,6 +197,8 @@ def generate_cal(events, date_start, date_end, dates):
                 event.add('summary', i[11])
                 event.add("description", desc)
 
+                print(event)
+
                 cal.add_component(event)
     elif dates:
         for i in events:
@@ -226,6 +227,8 @@ def generate_cal(events, date_start, date_end, dates):
 
                     event.add('summary', i[11])
                     event.add("description", desc)
+
+                    print(event)
 
                     cal.add_component(event)
 
