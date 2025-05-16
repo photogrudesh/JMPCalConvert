@@ -33,18 +33,11 @@ def main():
         st.divider()
         st.subheader("Options")
 
-        colm1, colm2, colm3 = st.columns(3)
-
-        with colm1:
-            import_all = st.checkbox("Import all", key="importcheck")
-        with colm2:
-            import_suggested = st.checkbox("Import suggested dates", key="suggested_check")
-        with colm3:
-            import_week = st.checkbox("Import current week", key="current_week")
+        option = st.radio("Convert", ["All events", "Suggested dates", "Current week", "Custom dates"], horizontal=True)
 
         column1, column2 = st.columns(2)
 
-        if not import_all and not import_suggested and not import_week:
+        if option == "Custom dates":
             with column1:
                 date_start = st.date_input("Date to import from (inclusive)", value="today", min_value=None,
                                            max_value=None,
@@ -53,9 +46,9 @@ def main():
                 date_end = st.date_input("Last date to import (inclusive)", value="today", min_value=None,
                                          max_value=None,
                                          format="DD/MM/YYYY", key="dei")
-        elif import_suggested:
+        elif option == "Suggested dates":
             dates = [datetime.date(2025, 5, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
-        elif import_week:
+        elif option == "Current week":
             date_start = datetime.date(2025, 5, 19)
             date_end = datetime.date(2025, 5, 23)
         with column1:
@@ -70,9 +63,9 @@ def main():
 
         campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
 
-        if import_all:
+        if option == "All events":
             st.text(f"Importing all available events from {file}")
-        elif import_suggested:
+        elif option == "Suggested dates":
             st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
 
         valid_selection = True
