@@ -160,6 +160,7 @@ def process_xlsx(pbl, clin, campus, ws):
         if keep:
             saved.append(i)
         row_num += 1
+        print(i)
 
     return saved
 
