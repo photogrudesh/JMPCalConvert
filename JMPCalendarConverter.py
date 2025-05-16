@@ -51,7 +51,7 @@ def main():
 
         column1, column2 = st.columns(2)
 
-        if not import_all or import_suggested:
+        if not import_all and not import_suggested:
             with column1:
                 date_start = st.date_input("Date to import from (inclusive)", value=suggested_start, min_value=None,
                                            max_value=None,
