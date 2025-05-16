@@ -20,6 +20,7 @@ def main():
 
     date_start = datetime.date(1970, 1, 1)
     date_end = datetime.date(3000, 1, 1)
+    dates = []
 
     suggested_start = "today"
     suggested_end = "today"
@@ -30,14 +31,13 @@ def main():
         st.text("Suggested date range to update for Callaghan: 21/05/2025-22/05/2025 and 11/06/2025")
         col1, col2 = st.columns(2)
 
-        # with col1:
-        #    autofill = st.button("Apply suggested updates", use_container_width=True)
         with col1:
+            autofill = st.button("Apply suggested updates", use_container_width=True)
+        with col2:
             current_week = st.button("Update current week", use_container_width=True)
 
-        # if autofill:
-        #    suggested_start = datetime.date(2025, 4, 28)
-        #    suggested_end = datetime.date(2025, 6, 13)
+        if autofill:
+            dates = [datetime.date(2025, 5, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
         if current_week:
             suggested_start = datetime.date(2025, 5, 19)
             suggested_end = datetime.date(2025, 5, 24)
@@ -51,10 +51,11 @@ def main():
         st.subheader("Options")
 
         import_all = st.checkbox("Import all", key="importcheck")
+        import_suggested = st.checkbox("Import suggested dates", key="suggested_check")
 
         column1, column2 = st.columns(2)
 
-        if not import_all:
+        if not import_all or import_suggested:
             with column1:
                 date_start = st.date_input("Date to import from (inclusive)", value=suggested_start, min_value=None,
                                            max_value=None,
@@ -63,6 +64,12 @@ def main():
                 date_end = st.date_input("Last date to import (inclusive)", value=suggested_end, min_value=None,
                                          max_value=None,
                                          format="DD/MM/YYYY", key="dei")
+        elif import_all:
+            st.text(f"Importing all available events from {file}")
+        elif import_suggested:
+            st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
+            date_start = False
+            date_end = False
 
         with column1:
             pbl = st.selectbox("PBL group", (
@@ -107,7 +114,7 @@ def main():
 
         if pbl and clin and campus and go and valid_selection:
             saved = process_xlsx(pbl.upper(), clin, campus, ws)
-            generate_cal(saved, date_start, date_end)
+            generate_cal(saved, date_start, date_end, dates)
 
             if os.path.exists("calendar.ics"):
                 f = open("calendar.ics", "r")
@@ -165,39 +172,69 @@ def process_xlsx(pbl, clin, campus, ws):
     return saved
 
 
-def generate_cal(events, date_start, date_end):
+def generate_cal(events, date_start, date_end, dates):
     cal = Calendar()
     cal['version'] = '2.0'
     cal.add("prodid", "-//photogrudesh//JMPCalendarConverter//EN")
     cal.add("summary", "JMP schedule")
 
-    for i in events:
-        if date_start - datetime.timedelta(days=1) < i[3].date() < date_end + datetime.timedelta(days=1):
-            event = Event()
-            no_time = False
+    if not dates:
+        for i in events:
+            if date_start - datetime.timedelta(days=1) < i[3].date() < date_end + datetime.timedelta(days=1):
+                event = Event()
+                no_time = False
 
-            try:
-                start, end = convert_datetime(i[3], i[4])
-                event.add('dtstart', start)
-                event.add('dtend', end)
-            except TypeError:
-                no_time = True
+                try:
+                    start, end = convert_datetime(i[3], i[4])
+                    event.add('dtstart', start)
+                    event.add('dtend', end)
+                except TypeError:
+                    no_time = True
 
-            if i[10] is None:
-                attendance = "N/A"
-            else:
-                attendance = i[10]
+                if i[10] is None:
+                    attendance = "N/A"
+                else:
+                    attendance = i[10]
 
-            desc = f"{i[8]}: {i[9]}\n{i[7]}\nStudents: {i[6]}\nAttendance: {attendance}\nStaff: {i[12]}\nUpdates: {i[13]}"
+                desc = f"{i[8]}: {i[9]}\n{i[7]}\nStudents: {i[6]}\nAttendance: {attendance}\nStaff: {i[12]}\nUpdates: {i[13]}"
 
-            if no_time:
-                event.add('dtstart', i[3])
-                event.add('dtend', i[3] + datetime.timedelta(days=1))
+                if no_time:
+                    event.add('dtstart', i[3])
+                    event.add('dtend', i[3] + datetime.timedelta(days=1))
 
-            event.add('summary', i[11])
-            event.add("description", desc)
+                event.add('summary', i[11])
+                event.add("description", desc)
 
-            cal.add_component(event)
+                cal.add_component(event)
+        if dates:
+            for i in events:
+                for j in dates:
+                    if i[3].date() == j:
+                        event = Event()
+                        no_time = False
+
+                        try:
+                            start, end = convert_datetime(i[3], i[4])
+                            event.add('dtstart', start)
+                            event.add('dtend', end)
+                        except TypeError:
+                            no_time = True
+
+                        if i[10] is None:
+                            attendance = "N/A"
+                        else:
+                            attendance = i[10]
+
+                        desc = f"{i[8]}: {i[9]}\n{i[7]}\nStudents: {i[6]}\nAttendance: {attendance}\nStaff: {i[12]}\nUpdates: {i[13]}"
+
+                        if no_time:
+                            event.add('dtstart', i[3])
+                            event.add('dtend', i[3] + datetime.timedelta(days=1))
+
+                        event.add('summary', i[11])
+                        event.add("description", desc)
+
+                        cal.add_component(event)
 
     print(cal.to_ical()[:129])
 
