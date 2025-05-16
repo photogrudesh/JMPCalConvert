@@ -16,7 +16,7 @@ def main():
     st.subheader("Upload xlsx")
 
     use_latest = st.checkbox("Use latest year 1 timetable (last updated: 14:58 24/04/2025)", value=True)
-    file = "MEDI1101 24042025.xlsx"
+    file = "MEDI1101 16052025.xlsx"
 
     date_start = datetime.date(1970, 1, 1)
     date_end = datetime.date(3000, 1, 1)
@@ -27,20 +27,20 @@ def main():
     if not use_latest:
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
     else:
-        st.text("Suggested date range to update for Callaghan: 28/04/2025-13/06/2025")
+        st.text("Suggested date range to update for Callaghan: 21/05/2025-22/05/2025 and 11/06/2025")
         col1, col2 = st.columns(2)
 
-        with col1:
-            autofill = st.button("Apply suggested updates", use_container_width=True)
+        # with col1:
+        #    autofill = st.button("Apply suggested updates", use_container_width=True)
         with col2:
             current_week = st.button("Update current week", use_container_width=True)
 
-        if autofill:
-            suggested_start = datetime.date(2025, 4, 28)
-            suggested_end = datetime.date(2025, 6, 13)
+        # if autofill:
+        #    suggested_start = datetime.date(2025, 4, 28)
+        #    suggested_end = datetime.date(2025, 6, 13)
         if current_week:
-            suggested_start = datetime.date(2025, 4, 28)
-            suggested_end = datetime.date(2025, 5, 2)
+            suggested_start = datetime.date(2025, 5, 19)
+            suggested_end = datetime.date(2025, 5, 24)
 
     if file:
         # process file and determine which date ranges are valid
@@ -115,7 +115,8 @@ def main():
                 with col12:
                     st.download_button("Download ics file", data=f, file_name="Calendar.ics", use_container_width=True)
 
-                st.text("Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. DM me @photogrudesh on Instagram if there are any issues.")
+                st.text(
+                    "Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. DM me @photogrudesh on Instagram if there are any issues.")
 
 
 def process_xlsx(pbl, clin, campus, ws):
@@ -197,6 +198,8 @@ def generate_cal(events, date_start, date_end):
             event.add("description", desc)
 
             cal.add_component(event)
+
+    print(cal.to_ical()[:129])
 
     with open("calendar.ics", "wb") as f:
         f.write(cal.to_ical())
