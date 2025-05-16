@@ -28,7 +28,6 @@ def main():
     if not use_latest:
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
     else:
-        st.text("Suggested date range to update for Callaghan: 21/05/2025-22/05/2025 and 11/06/2025")
         col1, col2 = st.columns(2)
 
         with col1:
