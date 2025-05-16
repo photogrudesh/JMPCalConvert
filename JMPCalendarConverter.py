@@ -32,7 +32,7 @@ def main():
 
         # with col1:
         #    autofill = st.button("Apply suggested updates", use_container_width=True)
-        with col2:
+        with col1:
             current_week = st.button("Update current week", use_container_width=True)
 
         # if autofill:
