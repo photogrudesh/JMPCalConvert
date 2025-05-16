@@ -32,12 +32,8 @@ def main():
         col1, col2 = st.columns(2)
 
         with col1:
-            autofill = st.button("Apply suggested updates", use_container_width=True)
-        with col2:
             current_week = st.button("Update current week", use_container_width=True)
 
-        if autofill:
-            dates = [datetime.date(2025, 5, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
         if current_week:
             suggested_start = datetime.date(2025, 5, 19)
             suggested_end = datetime.date(2025, 5, 24)
@@ -70,6 +66,7 @@ def main():
             st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
             date_start = False
             date_end = False
+            dates = [datetime.date(2025, 5, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
 
         with column1:
             pbl = st.selectbox("PBL group", (
