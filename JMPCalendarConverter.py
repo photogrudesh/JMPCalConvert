@@ -203,35 +203,35 @@ def generate_cal(events, date_start, date_end, dates):
                 event.add("description", desc)
 
                 cal.add_component(event)
-        if dates:
-            for i in events:
-                for j in dates:
-                    if i[3].date() == j:
-                        event = Event()
-                        no_time = False
+    elif dates:
+        for i in events:
+            for j in dates:
+                if i[3].date() == j:
+                    event = Event()
+                    no_time = False
 
-                        try:
-                            start, end = convert_datetime(i[3], i[4])
-                            event.add('dtstart', start)
-                            event.add('dtend', end)
-                        except TypeError:
-                            no_time = True
+                    try:
+                        start, end = convert_datetime(i[3], i[4])
+                        event.add('dtstart', start)
+                        event.add('dtend', end)
+                    except TypeError:
+                        no_time = True
 
-                        if i[10] is None:
-                            attendance = "N/A"
-                        else:
-                            attendance = i[10]
+                    if i[10] is None:
+                        attendance = "N/A"
+                    else:
+                        attendance = i[10]
 
-                        desc = f"{i[8]}: {i[9]}\n{i[7]}\nStudents: {i[6]}\nAttendance: {attendance}\nStaff: {i[12]}\nUpdates: {i[13]}"
+                    desc = f"{i[8]}: {i[9]}\n{i[7]}\nStudents: {i[6]}\nAttendance: {attendance}\nStaff: {i[12]}\nUpdates: {i[13]}"
 
-                        if no_time:
-                            event.add('dtstart', i[3])
-                            event.add('dtend', i[3] + datetime.timedelta(days=1))
+                    if no_time:
+                        event.add('dtstart', i[3])
+                        event.add('dtend', i[3] + datetime.timedelta(days=1))
 
-                        event.add('summary', i[11])
-                        event.add("description", desc)
+                    event.add('summary', i[11])
+                    event.add("description", desc)
 
-                        cal.add_component(event)
+                    cal.add_component(event)
 
     print(cal.to_ical()[:129])
 
