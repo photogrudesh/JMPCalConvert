@@ -63,7 +63,6 @@ def main():
                                          max_value=None,
                                          format="DD/MM/YYYY", key="dei")
         elif import_suggested:
-            st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
             date_start = False
             date_end = False
             dates = [datetime.date(2025, 5, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
