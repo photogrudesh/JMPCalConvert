@@ -22,20 +22,8 @@ def main():
     date_end = datetime.date(3000, 1, 1)
     dates = []
 
-    suggested_start = "today"
-    suggested_end = "today"
-
     if not use_latest:
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
-    else:
-        col1, col2 = st.columns(2)
-
-        with col1:
-            current_week = st.button("Update current week", use_container_width=True)
-
-        if current_week:
-            suggested_start = datetime.date(2025, 5, 19)
-            suggested_end = datetime.date(2025, 5, 24)
 
     if file:
         # process file and determine which date ranges are valid
@@ -45,27 +33,31 @@ def main():
         st.divider()
         st.subheader("Options")
 
+        colm1, colm2, colm3 = st.columns(3)
+
+        with colm1:
+            import_all = st.checkbox("Import all", key="importcheck")
+        with colm2:
+            import_suggested = st.checkbox("Import suggested dates", key="suggested_check")
+        with colm3:
+            import_week = st.checkbox("Import current week", key="current_week")
+
         column1, column2 = st.columns(2)
 
-        with column1:
-            import_all = st.checkbox("Import all", key="importcheck")
-        with column2:
-            import_suggested = st.checkbox("Import suggested dates", key="suggested_check")
-
-        if not import_all and not import_suggested:
+        if not import_all and not import_suggested and not import_week:
             with column1:
-                date_start = st.date_input("Date to import from (inclusive)", value=suggested_start, min_value=None,
+                date_start = st.date_input("Date to import from (inclusive)", value="today", min_value=None,
                                            max_value=None,
                                            format="DD/MM/YYYY", key="dsi")
             with column2:
-                date_end = st.date_input("Last date to import (inclusive)", value=suggested_end, min_value=None,
+                date_end = st.date_input("Last date to import (inclusive)", value="today", min_value=None,
                                          max_value=None,
                                          format="DD/MM/YYYY", key="dei")
         elif import_suggested:
-            date_start = False
-            date_end = False
             dates = [datetime.date(2025, 5, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
-
+        elif import_week:
+            date_start = datetime.date(2025, 5, 19)
+            date_end = datetime.date(2025, 5, 23)
         with column1:
             pbl = st.selectbox("PBL group", (
                 "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"),
