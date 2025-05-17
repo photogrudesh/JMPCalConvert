@@ -165,8 +165,7 @@ def generate_cal(events, date_start, date_end, dates):
     cal.add("prodid", "-//photogrudesh//JMPCalendarConverter//EN")
     cal.add("summary", "JMP schedule")
 
-    with st.status("Downloading data..."):
-        st.write("Searching for data...")
+    with st.status("Importing events..."):
 
         if not dates:
             for i in events:
@@ -226,7 +225,7 @@ def generate_cal(events, date_start, date_end, dates):
                         print(event)
 
                         cal.add_component(event)
-            st.write(f"{start}: {i[11]}")
+        st.write(f"{start}: {i[11]}")
 
     with open("calendar.ics", "wb") as f:
         f.write(cal.to_ical())
