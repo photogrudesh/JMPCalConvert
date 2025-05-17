@@ -165,40 +165,12 @@ def generate_cal(events, date_start, date_end, dates):
     cal.add("prodid", "-//photogrudesh//JMPCalendarConverter//EN")
     cal.add("summary", "JMP schedule")
 
-    if not dates:
-        for i in events:
-            if date_start - datetime.timedelta(days=1) < i[3].date() < date_end + datetime.timedelta(days=1):
-                event = Event()
-                no_time = False
+    with st.status("Downloading data..."):
+        st.write("Searching for data...")
 
-                try:
-                    start, end = convert_datetime(i[3], i[4])
-                    event.add('dtstart', start)
-                    event.add('dtend', end)
-                except TypeError:
-                    no_time = True
-
-                if i[10] is None:
-                    attendance = "N/A"
-                else:
-                    attendance = i[10]
-
-                desc = f"{i[8]}: {i[9]}\n{i[7]}\nStudents: {i[6]}\nAttendance: {attendance}\nStaff: {i[12]}\nUpdates: {i[13]}"
-
-                if no_time:
-                    event.add('dtstart', i[3])
-                    event.add('dtend', i[3] + datetime.timedelta(days=1))
-
-                event.add('summary', i[11])
-                event.add("description", desc)
-
-                print(event)
-
-                cal.add_component(event)
-    elif dates:
-        for i in events:
-            for j in dates:
-                if i[3].date() == j:
+        if not dates:
+            for i in events:
+                if date_start - datetime.timedelta(days=1) < i[3].date() < date_end + datetime.timedelta(days=1):
                     event = Event()
                     no_time = False
 
@@ -222,12 +194,39 @@ def generate_cal(events, date_start, date_end, dates):
 
                     event.add('summary', i[11])
                     event.add("description", desc)
-
-                    print(event)
-
                     cal.add_component(event)
+        elif dates:
+            for i in events:
+                for j in dates:
+                    if i[3].date() == j:
+                        event = Event()
+                        no_time = False
 
-    print(cal.to_ical()[:129])
+                        try:
+                            start, end = convert_datetime(i[3], i[4])
+                            event.add('dtstart', start)
+                            event.add('dtend', end)
+                        except TypeError:
+                            no_time = True
+
+                        if i[10] is None:
+                            attendance = "N/A"
+                        else:
+                            attendance = i[10]
+
+                        desc = f"{i[8]}: {i[9]}\n{i[7]}\nStudents: {i[6]}\nAttendance: {attendance}\nStaff: {i[12]}\nUpdates: {i[13]}"
+
+                        if no_time:
+                            event.add('dtstart', i[3])
+                            event.add('dtend', i[3] + datetime.timedelta(days=1))
+
+                        event.add('summary', i[11])
+                        event.add("description", desc)
+
+                        print(event)
+
+                        cal.add_component(event)
+            st.write(f"{start}: {i[11]}")
 
     with open("calendar.ics", "wb") as f:
         f.write(cal.to_ical())
