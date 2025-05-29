@@ -49,8 +49,8 @@ def main():
         elif option == "Suggested dates":
             dates = [datetime.date(2025, 5, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
         elif option == "Current week":
-            date_start = datetime.date(2025, 5, 19)
-            date_end = datetime.date(2025, 5, 23)
+            date_start = datetime.date(2025, 5, 26)
+            date_end = datetime.date(2025, 5, 30)
         with column1:
             pbl = st.selectbox("PBL group", (
                 "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"),
@@ -68,7 +68,7 @@ def main():
         elif option == "Suggested dates":
             st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
         elif option == "Current week":
-            st.text("Importing JMP week 12: 19/05/2025-23/05/2025")
+            st.text("Importing JMP week 13: 26/05/2025-30/05/2025")
 
         valid_selection = True
 
