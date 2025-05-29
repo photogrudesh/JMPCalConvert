@@ -15,8 +15,8 @@ def main():
     st.divider()
     st.subheader("Upload xlsx")
 
-    use_latest = st.checkbox("Use latest year 1 timetable (last updated: 18:01 16/05/2025)", value=True)
-    file = "MEDI1101 16052025.xlsx"
+    use_latest = st.checkbox("Use latest year 1 timetable (last updated: 11:48 29/05/2025)", value=True)
+    file = "MEDI1101 29052025.xlsx"
 
     date_start = datetime.date(1970, 1, 1)
     date_end = datetime.date(3000, 1, 1)
@@ -222,8 +222,6 @@ def generate_cal(events, date_start, date_end, dates):
 
                         event.add('summary', i[11])
                         event.add("description", desc)
-
-                        print(event)
 
                         cal.add_component(event)
                         st.write(f"{start}: " + i[11].replace('\n', ''))
