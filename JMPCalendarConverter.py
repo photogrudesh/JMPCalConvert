@@ -16,7 +16,7 @@ def main():
     st.subheader("Upload xlsx")
 
     use_latest = st.checkbox("Use latest year 1 timetable (last updated: 09:31 06/06/2025)", value=True)
-    file = "MEDI1101A 06062025.xlsx.xlsx"
+    file = "MEDI1101A 06062025.xlsx"
 
     date_start = datetime.date(1970, 1, 1)
     date_end = datetime.date(3000, 1, 1)
