@@ -15,8 +15,8 @@ def main():
     st.divider()
     st.subheader("Upload xlsx")
 
-    use_latest = st.checkbox("Use latest year 1 timetable (last updated: 11:48 29/05/2025)", value=True)
-    file = "MEDI1101 29052025.xlsx"
+    use_latest = st.checkbox("Use latest year 1 timetable (last updated: 09:16 06/06/2025)", value=True)
+    file = "MEDI1101A 06062025.xlsx"
 
     date_start = datetime.date(1970, 1, 1)
     date_end = datetime.date(3000, 1, 1)
@@ -49,8 +49,8 @@ def main():
         elif option == "Suggested dates":
             dates = [datetime.date(2025, 5, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
         elif option == "Current week":
-            date_start = datetime.date(2025, 5, 26)
-            date_end = datetime.date(2025, 5, 30)
+            date_start = datetime.date(2025, 6, 9)
+            date_end = datetime.date(2025, 6, 13)
         with column1:
             pbl = st.selectbox("PBL group", (
                 "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"),
@@ -68,7 +68,7 @@ def main():
         elif option == "Suggested dates":
             st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
         elif option == "Current week":
-            st.text("Importing JMP week 13: 26/05/2025-30/05/2025")
+            st.text("Importing JMP week 16: 09/06/2025-13/06/2025")
 
         valid_selection = True
 
