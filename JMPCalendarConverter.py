@@ -20,7 +20,7 @@ def main():
 
     date_start = datetime.date(1970, 1, 1)
     date_end = datetime.date(3000, 1, 1)
-    dates = [datetime.date(2025, 6, 9), datetime.date(2025, 6, 10), datetime.date(2025, 6, 11), datetime.date(2025, 6, 12), datetime.date(2025, 6, 13)]
+    dates = []
 
     if not use_latest:
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
