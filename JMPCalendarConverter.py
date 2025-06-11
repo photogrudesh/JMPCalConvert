@@ -194,7 +194,7 @@ def generate_cal(events, date_start, date_end, dates):
                     event.add('summary', i[11])
                     event.add("description", desc)
                     cal.add_component(event)
-                    # st.write(f"{start}: " + i[11].replace('\n', ''))
+                    st.write(f"{start}: " + i[11].replace('\n', ''))
         elif dates:
             for i in events:
                 for j in dates:
