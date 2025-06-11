@@ -33,7 +33,7 @@ def main():
         st.divider()
         st.subheader("Options")
 
-        option = st.radio("Convert", ["All events", "Current week", "Custom dates"], horizontal=True)
+        option = st.radio("Convert", ["All events", "Custom dates"], horizontal=True)
 
         column1, column2 = st.columns(2)
 
