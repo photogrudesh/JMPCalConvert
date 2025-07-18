@@ -95,7 +95,7 @@ def main():
         else:
             st.warning(f"Select your timetable.")
 
-        if pbl and clin and campus and go and valid_selection:
+        if go and valid_selection:
             saved = process_xlsx(pbl.upper(), clin, campus, ws)
             generate_cal(saved, date_start, date_end, dates)
 
