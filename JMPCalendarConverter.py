@@ -57,11 +57,11 @@ def main():
                                index=None,
                                placeholder="Select PBL group")
         with column2:
-            clin = st.selectbox("Clinical group", (
-                "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
-                "20"), index=None, placeholder="Select clinical group")
+        #    clin = st.selectbox("Clinical group", (
+        #        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
+        #        "20"), index=None, placeholder="Select clinical group")
 
-        campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
+            campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
 
         if option == "All events":
             st.text(f"Importing all available events from {file}")
