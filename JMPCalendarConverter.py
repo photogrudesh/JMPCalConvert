@@ -76,6 +76,7 @@ def main():
 
         if campus == "Callaghan" and pbl not in ["E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"]:
             st.error(f"Callaghan does not have PBL group {pbl}")
+            clin = "5"
             valid_selection = False
         elif campus == "Central Coast" and pbl and clin:
             if pbl not in ["A", "B", "C", "D"]:
