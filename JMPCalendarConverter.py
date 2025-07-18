@@ -35,6 +35,8 @@ def main():
 
         option = st.radio("Convert", ["All events", "Current week", "Custom dates"], horizontal=True)
 
+        campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
+
         column1, column2 = st.columns(2)
 
         if option == "Custom dates":
@@ -51,8 +53,6 @@ def main():
         elif option == "Current week":
             date_start = datetime.date(2025, 7, 21)
             date_end = datetime.date(2025, 7, 25)
-
-        campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
 
         with column1:
             pbl = st.selectbox("PBL group", (
