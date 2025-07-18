@@ -74,24 +74,22 @@ def main():
 
         valid_selection = True
 
-        if pbl and campus:
-            if campus == "Callaghan":
-                if pbl not in ["E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"]:
-                    st.error(f"Callaghan does not have PBL group {pbl}")
-                    valid_selection = False
-            elif campus == "Central Coast":
-                if pbl not in ["A", "B", "C", "D"]:
-                    st.error(f"Central Coast does not have PBL group {pbl}")
-                    valid_selection = False
-                if clin not in ["1", "2", "3", "4"]:
-                    st.error(f"Central Coast does not have clinical group {clin}")
-                    valid_selection = False
+        if campus == "Callaghan" and pbl not in ["E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"]:
+            st.error(f"Callaghan does not have PBL group {pbl}")
+            valid_selection = False
+        elif campus == "Central Coast" and pbl and clin:
+            if pbl not in ["A", "B", "C", "D"]:
+                st.error(f"Central Coast does not have PBL group {pbl}")
+                valid_selection = False
+            if clin not in ["1", "2", "3", "4"]:
+                st.error(f"Central Coast does not have clinical group {clin}")
+                valid_selection = False
 
         go = False
 
         col11, col12 = st.columns(2)
 
-        if valid_selection and pbl and clin and campus:
+        if valid_selection and pbl and campus == "Callaghan":
             with col11:
                 go = st.button("Start converting", use_container_width=True)
         else:
