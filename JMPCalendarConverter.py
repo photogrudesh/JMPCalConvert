@@ -47,10 +47,10 @@ def main():
                                          max_value=None,
                                          format="DD/MM/YYYY", key="dei")
         elif option == "Suggested dates":
-            dates = [datetime.date(2025, 5, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
+            dates = [datetime.date(2025, 7, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
         elif option == "Current week":
-            date_start = datetime.date(2025, 6, 9)
-            date_end = datetime.date(2025, 6, 13)
+            date_start = datetime.date(2025, 7, 21)
+            date_end = datetime.date(2025, 7, 25)
         with column1:
             pbl = st.selectbox("PBL group", (
                 "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"),
