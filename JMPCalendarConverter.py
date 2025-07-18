@@ -51,17 +51,19 @@ def main():
         elif option == "Current week":
             date_start = datetime.date(2025, 7, 21)
             date_end = datetime.date(2025, 7, 25)
+
+        campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
+
         with column1:
             pbl = st.selectbox("PBL group", (
                 "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"),
                                index=None,
                                placeholder="Select PBL group")
         with column2:
-        #    clin = st.selectbox("Clinical group", (
-        #        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
-        #        "20"), index=None, placeholder="Select clinical group")
+            if campus == "Central Coast":
+                clin = st.selectbox("Clinical group", (
+                    "1", "2", "3", "4"), index=None, placeholder="Select clinical group")
 
-            campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
 
         if option == "All events":
             st.text(f"Importing all available events from {file}")
@@ -76,10 +78,6 @@ def main():
             if campus == "Callaghan":
                 if pbl not in ["E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"]:
                     st.error(f"Callaghan does not have PBL group {pbl}")
-                    valid_selection = False
-                if clin not in ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
-                                "20"]:
-                    st.error(f"Callaghan does not have clinical group {clin}")
                     valid_selection = False
             elif campus == "Central Coast":
                 if pbl not in ["A", "B", "C", "D"]:
