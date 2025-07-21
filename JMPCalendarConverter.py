@@ -63,6 +63,8 @@ def main():
             if campus == "Central Coast":
                 clin = st.selectbox("Clinical group", (
                     "1", "2", "3", "4"), index=None, placeholder="Select clinical group")
+            else:
+                clin = "5"
 
 
         if option == "All events":
