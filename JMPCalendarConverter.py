@@ -88,6 +88,8 @@ def main():
                 st.error(f"Central Coast does not have clinical group {clin}")
                 valid_selection = False
 
+        go = False
+
         col11, col12 = st.columns(2)
 
         if valid_selection:
