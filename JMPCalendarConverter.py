@@ -25,7 +25,7 @@ def main():
 
     if use_latest and university == "University of Newcastle":
         file = "UONMEDI1101B 18072025.xlsx"
-    elif use_latest and university == "University of New England":
+    elif use_latest and university == "University of New England (beta)":
         file = "UNEMEDI1101B 25072025.xlsx"
     else:
         file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
