@@ -121,7 +121,7 @@ def main():
                     st.text(
                         "Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. DM me @photogrudesh on Instagram if there are any issues.")
 
-        elif university == "University of New England":
+        elif university == "University of New England (beta)":
 
             column1, column2 = st.columns(2)
 
