@@ -15,7 +15,7 @@ def main():
     st.subheader("Being updated for UNE but UON stuff should still work")
     st.divider()
 
-    university = st.radio("University", ["University of Newcastle", "University of New England"], horizontal=True)
+    university = st.radio("University", ["University of Newcastle", "University of New England (beta)"], horizontal=True)
     use_latest = False
 
     if university == "University of Newcastle":
