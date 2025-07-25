@@ -123,7 +123,67 @@ def main():
                         "Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. DM me @photogrudesh on Instagram if there are any issues.")
 
         elif university == "University of New England":
-            st.text("yo")
+
+            column1, column2 = st.columns(2)
+
+            if option == "Custom dates":
+                with column1:
+                    date_start = st.date_input("Date to import from (inclusive)", value="today", min_value=None,
+                                               max_value=None,
+                                               format="DD/MM/YYYY", key="dsi")
+                with column2:
+                    date_end = st.date_input("Last date to import (inclusive)", value="today", min_value=None,
+                                             max_value=None,
+                                             format="DD/MM/YYYY", key="dei")
+            elif option == "Suggested dates":
+                dates = [datetime.date(2025, 7, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
+            elif option == "Current week":
+                date_start = datetime.date(2025, 7, 21)
+                date_end = datetime.date(2025, 7, 25)
+
+            pbl = st.selectbox("PBL group", ("A", "B", "C", "D", "E", "F", "G", "H", "I"),
+                           index=None,
+                           placeholder="Select PBL group")
+
+            with column1:
+                clin = st.selectbox("Clin group", ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"),
+                                   index=None,
+                                   placeholder="Select clin group")
+            with column2:
+                comm = st.selectbox("Comm group", ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"),
+                                   index=None,
+                                   placeholder="Select comm group")
+
+            if option == "All events":
+                st.text(f"Importing all available events from {file}")
+            elif option == "Suggested dates":
+                st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
+            elif option == "Current week":
+                st.text("Importing JMP week 16: 21/07/2025-25/07/2025")
+
+            go = False
+
+            col11, col12 = st.columns(2)
+
+            if pbl and clin and comm:
+                with col11:
+                    go = st.button("Start converting", use_container_width=True)
+            else:
+                st.warning(f"Select your timetable.")
+
+            if go and pbl and clin and comm:
+                saved = process_xlsx_une(pbl.upper(), clin, comm, ws)
+                generate_cal_une(saved, date_start, date_end, dates)
+
+                if os.path.exists("calendar.ics"):
+                    f = open("calendar.ics", "r")
+
+                    with col12:
+                        st.download_button("Download ics file", data=f, file_name="Calendar.ics",
+                                           use_container_width=True)
+
+                    st.text(
+                        "Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. DM me @photogrudesh on Instagram if there are any issues.")
 
 
 def process_xlsx_une(pbl, clin, comm, ws):
