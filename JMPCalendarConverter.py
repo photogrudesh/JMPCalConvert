@@ -275,7 +275,10 @@ def generate_cal_une(events, date_start, date_end, dates):
                     event.add('summary', i[9])
                     event.add("description", desc)
                     cal.add_component(event)
-                    st.write(f"{start}: " + i[9].replace('\n', ''))
+                    if not no_time:
+                        st.write(f"{start}: " + i[9].replace('\n', ''))
+                    else:
+                        st.write(i[9].replace('\n', ''))
 
         elif dates:
             for i in events:
@@ -306,7 +309,10 @@ def generate_cal_une(events, date_start, date_end, dates):
                         event.add("description", desc)
 
                         cal.add_component(event)
-                        st.write(f"{start}: " + i[9].replace('\n', ''))
+                        if not no_time:
+                            st.write(f"{start}: " + i[9].replace('\n', ''))
+                        else:
+                            st.write(i[9].replace('\n', ''))
 
     with open("calendar.ics", "wb") as f:
         f.write(cal.to_ical())
@@ -393,7 +399,11 @@ def generate_cal(events, date_start, date_end, dates):
                     event.add('summary', i[11])
                     event.add("description", desc)
                     cal.add_component(event)
-                    st.write(f"{start}: " + i[11].replace('\n', ''))
+                    if not no_time:
+                        st.write(f"{start}: " + i[11].replace('\n', ''))
+                    else:
+                        st.write(i[11].replace('\n', ''))
+
         elif dates:
             for i in events:
                 for j in dates:
@@ -423,7 +433,10 @@ def generate_cal(events, date_start, date_end, dates):
                         event.add("description", desc)
 
                         cal.add_component(event)
-                        st.write(f"{start}: " + i[11].replace('\n', ''))
+                        if not no_time:
+                            st.write(f"{start}: " + i[11].replace('\n', ''))
+                        else:
+                            st.write(i[11].replace('\n', ''))
 
     with open("calendar.ics", "wb") as f:
         f.write(cal.to_ical())
