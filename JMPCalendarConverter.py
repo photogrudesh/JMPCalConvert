@@ -48,7 +48,7 @@ def main():
             if option == "Suggested dates":
                 dates = [datetime.date(2025, 7, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
             elif option == "Current week":
-                date_start = datetime.date(2025, 7, 25)
+                date_start = datetime.date(2025, 7, 27)
                 date_end = datetime.date(2025, 8, 2)
 
         if university == "University of Newcastle":
@@ -84,7 +84,7 @@ def main():
             elif option == "Suggested dates":
                 st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
             elif option == "Current week":
-                st.text("Importing JMP week 16: 21/07/2025-25/07/2025")
+                st.text("Importing JMP week 17: 27/07/2025-2/08/2025")
 
             valid_selection = True
 
