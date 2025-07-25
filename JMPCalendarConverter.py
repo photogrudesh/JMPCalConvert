@@ -12,7 +12,6 @@ def main():
     st.set_page_config(page_title="JMPCalendarConverter")
 
     st.title("JMPCalendarConverter")
-    st.subheader("Being updated for UNE but UON stuff should still work")
     st.divider()
 
     university = st.radio("University", ["University of Newcastle", "University of New England (beta)"], horizontal=True)
