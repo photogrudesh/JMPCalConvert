@@ -18,13 +18,13 @@ def main():
     use_latest = False
 
     if university == "University of Newcastle":
-        use_latest = st.checkbox("Use latest UON year 1 timetable (last updated: 13:17 18/07/2025)", value=True)
+        use_latest = st.checkbox("Use latest UON year 1 timetable (last updated: 18:34 25/07/2025)", value=True)
 
     elif university == "University of New England (beta)":
         use_latest = st.checkbox("Use latest UNE year 1 timetable (last updated: 12:28 25/07/2025)", value=True)
 
     if use_latest and university == "University of Newcastle":
-        file = "UONMEDI1101B 18072025.xlsx"
+        file = "UONMEDI1101B 25072025.xlsx"
     elif use_latest and university == "University of New England (beta)":
         file = "UNEMEDI1101B 25072025.xlsx"
     else:
@@ -44,6 +44,13 @@ def main():
 
         option = st.radio("Convert", ["All events", "Current week", "Custom dates"], horizontal=True)
 
+        if option != "Custom dates":
+            if option == "Suggested dates":
+                dates = [datetime.date(2025, 7, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
+            elif option == "Current week":
+                date_start = datetime.date(2025, 7, 25)
+                date_end = datetime.date(2025, 8, 2)
+
         if university == "University of Newcastle":
             campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
 
@@ -58,11 +65,6 @@ def main():
                     date_end = st.date_input("Last date to import (inclusive)", value="today", min_value=None,
                                              max_value=None,
                                              format="DD/MM/YYYY", key="dei")
-            elif option == "Suggested dates":
-                dates = [datetime.date(2025, 7, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
-            elif option == "Current week":
-                date_start = datetime.date(2025, 7, 21)
-                date_end = datetime.date(2025, 7, 25)
 
             with column1:
                 pbl = st.selectbox("PBL group", (
@@ -134,11 +136,6 @@ def main():
                     date_end = st.date_input("Last date to import (inclusive)", value="today", min_value=None,
                                              max_value=None,
                                              format="DD/MM/YYYY", key="dei")
-            elif option == "Suggested dates":
-                dates = [datetime.date(2025, 7, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
-            elif option == "Current week":
-                date_start = datetime.date(2025, 7, 21)
-                date_end = datetime.date(2025, 7, 25)
 
             pbl = st.selectbox("PBL group", ("A", "B", "C", "D", "E", "F", "G", "H", "I"),
                            index=None,
