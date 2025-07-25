@@ -14,7 +14,6 @@ def main():
     st.title("JMPCalendarConverter")
     st.subheader("Being updated for UNE but UON stuff should still work")
     st.divider()
-    st.subheader("Select xlsx")
 
     university = st.radio("", ["University of Newcastle", "University of New England"], horizontal=True)
     use_latest = False
