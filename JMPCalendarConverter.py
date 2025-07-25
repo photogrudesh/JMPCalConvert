@@ -16,7 +16,7 @@ def main():
     st.divider()
     st.subheader("Select xlsx")
 
-    university = st.radio(None, ["University of Newcastle", "University of New England"], horizontal=True)
+    university = st.radio("", ["University of Newcastle", "University of New England"], horizontal=True)
     use_latest = False
 
     if university == "University of Newcastle":
