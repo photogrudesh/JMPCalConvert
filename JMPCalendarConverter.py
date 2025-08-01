@@ -18,13 +18,13 @@ def main():
     use_latest = False
 
     if university == "University of Newcastle":
-        use_latest = st.checkbox("Use latest UON year 1 timetable (last updated: 18:34 25/07/2025)", value=True)
+        use_latest = st.checkbox("Use latest UON year 1 timetable (last updated: 16:32 01/08/2025)", value=True)
 
     elif university == "University of New England (beta)":
         use_latest = st.checkbox("Use latest UNE year 1 timetable (last updated: 12:28 25/07/2025)", value=True)
 
     if use_latest and university == "University of Newcastle":
-        file = "UONMEDI1101B 25072025.xlsx"
+        file = "MEDI1101B Callaghan & Central Coast - Timetable 2025 - Weeks 16-29.xlsx"
     elif use_latest and university == "University of New England (beta)":
         file = "UNEMEDI1101B 25072025.xlsx"
     else:
@@ -48,8 +48,8 @@ def main():
             if option == "Suggested dates":
                 dates = [datetime.date(2025, 7, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
             elif option == "Current week":
-                date_start = datetime.date(2025, 7, 27)
-                date_end = datetime.date(2025, 8, 2)
+                date_start = datetime.date(2025, 8, 3)
+                date_end = datetime.date(2025, 8, 9)
 
         if university == "University of Newcastle":
             campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
@@ -84,7 +84,7 @@ def main():
             elif option == "Suggested dates":
                 st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
             elif option == "Current week":
-                st.text("Importing JMP week 17: 27/07/2025-2/08/2025")
+                st.text("Importing JMP week 18: 03/08/2025-9/08/2025")
 
             valid_selection = True
 
