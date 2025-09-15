@@ -24,7 +24,7 @@ def main():
         use_latest = st.checkbox("Use latest UNE year 1 timetable (last updated: 12:28 25/07/2025)", value=True)
 
     if use_latest and university == "University of Newcastle":
-        file = "MEDI1101B Callaghan & Central Coast - Timetable 2025 - Weeks 16-29.xlsx"
+        file = "MEDI1101B Callaghan & Central Coast - Timetable 2025 - Weeks 16-29 (v9).xlsx"
     elif use_latest and university == "University of New England (beta)":
         file = "UNEMEDI1101B 25072025.xlsx"
     else:
