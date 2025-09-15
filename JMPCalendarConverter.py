@@ -18,7 +18,7 @@ def main():
     use_latest = False
 
     if university == "University of Newcastle":
-        use_latest = st.checkbox("Use latest UON year 1 timetable (last updated: 16:32 01/08/2025)", value=True)
+        use_latest = st.checkbox("Use latest UON year 1 timetable (last updated: 01:47 16/09/2025)", value=True)
 
     elif university == "University of New England (beta)":
         use_latest = st.checkbox("Use latest UNE year 1 timetable (last updated: 12:28 25/07/2025)", value=True)
