@@ -84,7 +84,7 @@ def main():
             elif option == "Suggested dates":
                 st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
             elif option == "Current week":
-                st.text("Importing JMP week 24: 14/08/2025-21/08/2025")
+                st.text("Importing JMP week 24: 14/09/2025-21/09/2025")
 
             valid_selection = True
 
