@@ -181,10 +181,6 @@ def main():
                     st.text(
                         "Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. DM me @photogrudesh on Instagram if there are any issues.")
 
-    st.divider()
-    st.text("Idk how many of you actually use this thing but if you want updates when I change things or notice something that isn't working properly feel free to join this gc.")
-    st.link_button("Join the updates gc", "https://ig.me/j/AbYtAB_nzraFz-1T/", type="secondary")
-
 
 def process_xlsx_une(pbl, clin, comm, ws):
     title_row = 2
