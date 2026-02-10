@@ -290,7 +290,11 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
 
         if "Zoom" in str(i[cal_index(uni_format, "venue")]):
             try:
-                i[cal_index(uni_format, "venue")] = ws.cell(row=row_num, column=8).hyperlink.target
+                if uni_format == "University of Newcastle":
+                    zoom_col = 8
+                elif uni_format == "University of New England":
+                    zoom_col = 7
+                i[cal_index(uni_format, "venue")] = ws.cell(row=row_num, column=zoom_col).hyperlink.target
             except AttributeError:
                 pass
 
