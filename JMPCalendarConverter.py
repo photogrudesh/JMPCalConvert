@@ -8,31 +8,47 @@ import parsedatetime as pdt
 import re
 
 
-def main():
+def main_ui():
     st.set_page_config(page_title="JMPCalendarConverter")
 
     st.title("JMPCalendarConverter")
+    st.text("Works well enough for now, I'm still ironing out bugs. Lmk if you notice anything @photogrudesh.")
+
     st.divider()
 
-    university = st.radio("University", ["University of Newcastle", "University of New England (beta)"], horizontal=True)
-    use_latest = False
+    university = st.radio("University", ["University of Newcastle", "University of New England", "Use your own file"], horizontal=True)
+    uni_format = None
+    file = None
+
+    files = os.listdir()
+    uoncals = []
+    unecals = []
+
+    for f in files:
+        if f.endswith(".xlsx"):
+            if f.startswith("CALCCCS"):
+                uoncals.append(f)
+            elif f.startswith("UNEARM"):
+                unecals.append(f)
 
     if university == "University of Newcastle":
-        use_latest = st.checkbox("Use latest UON year 1 timetable (last updated: 16:23 28/10/2025)", value=True)
+        file = st.selectbox("Select a UON timetable", uoncals, placeholder="Select timetable")
+        uni_format = "University of Newcastle"
 
-    elif university == "University of New England (beta)":
-        use_latest = st.checkbox("Use latest UNE year 1 timetable (last updated: 12:28 25/07/2025)", value=True)
+    if university == "University of New England":
+        file = st.selectbox("Select a UNE timetable", unecals, placeholder="Select timetable")
+        uni_format = "University of New England"
 
-    if use_latest and university == "University of Newcastle":
-        file = "MEDI1101B Callaghan & Central Coast - Timetable 2025 - Weeks 16-29 (v13).xlsx"
-    elif use_latest and university == "University of New England (beta)":
-        file = "UNEMEDI1101B 25072025.xlsx"
-    else:
-        file = st.file_uploader("Upload your calendar file", type=None, accept_multiple_files=False)
 
-    date_start = datetime.date(1970, 1, 1)
-    date_end = datetime.date(3000, 1, 1)
+    if university == "Use your own file":
+        file = st.file_uploader("Upload your own calendar file", type=None, accept_multiple_files=False)
+        uni_format = st.radio("Format",
+                              ["University of Newcastle", "University of New England"], horizontal=True)
+
     dates = []
+    date_start, date_end = None, None
+
+    valid_selection = False
 
     if file:
         # process file and determine which date ranges are valid
@@ -42,113 +58,59 @@ def main():
         st.divider()
         st.subheader("Options")
 
-        option = st.radio("Convert", ["All events", "Current week", "Custom dates"], horizontal=True)
+        option = st.radio("Convert", ["All events", "Custom dates"], horizontal=True)
 
-        if option != "Custom dates":
-            if option == "Suggested dates":
-                dates = [datetime.date(2025, 7, 21), datetime.date(2025, 5, 22), datetime.date(2025, 6, 11)]
-            elif option == "Current week":
-                date_start = datetime.date(2025, 10, 27)
-                date_end = datetime.date(2025, 10, 31)
+        campus = None
+        pbl = None
 
-        if university == "University of Newcastle":
+        column1, column2 = st.columns(2)
+
+        if option == "All events":
+            date_start = datetime.date(1970, 1, 1)
+            date_end = datetime.date(3000, 1, 1)
+        elif option == "Custom dates":
+            with column1:
+                date_start = st.date_input("Date to import from (inclusive)", value="today", min_value=None,
+                                           max_value=None,
+                                           format="DD/MM/YYYY", key="dsi")
+            with column2:
+                date_end = st.date_input("Last date to import (inclusive)", value="today", min_value=None,
+                                         max_value=None,
+                                         format="DD/MM/YYYY", key="dei")
+
+
+        if uni_format == "University of Newcastle":
             campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
 
-            column1, column2 = st.columns(2)
-
-            if option == "Custom dates":
-                with column1:
-                    date_start = st.date_input("Date to import from (inclusive)", value="today", min_value=None,
-                                               max_value=None,
-                                               format="DD/MM/YYYY", key="dsi")
-                with column2:
-                    date_end = st.date_input("Last date to import (inclusive)", value="today", min_value=None,
-                                             max_value=None,
-                                             format="DD/MM/YYYY", key="dei")
-
-            with column1:
-                pbl = st.selectbox("PBL group", (
-                    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"),
-                                   index=None,
-                                   placeholder="Select PBL group")
-            with column2:
-                if campus == "Central Coast":
-                    clin = st.selectbox("Clinical group", (
-                        "1", "2", "3", "4"), index=None, placeholder="Select clinical group")
-                else:
-                    clin = "5"
-
-
-            if option == "All events":
-                st.text(f"Importing all available events from {file}")
-            elif option == "Suggested dates":
-                st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
-            elif option == "Current week":
-                st.text("Importing JMP week 28: 27/10/2025-31/10/2025")
+            pbl = st.selectbox("PBL group", (
+                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"),
+                               index=None,
+                               placeholder="Select PBL group")
 
             valid_selection = True
 
             if campus == "Callaghan" and pbl and pbl not in ["E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"]:
                 st.error(f"Callaghan does not have PBL group {pbl}")
-                clin = "5"
                 valid_selection = False
-            elif campus == "Central Coast" and pbl and clin:
-                if pbl not in ["A", "B", "C", "D"]:
+            elif campus == "Central Coast" and pbl and pbl not in ["A", "B", "C", "D"]:
                     st.error(f"Central Coast does not have PBL group {pbl}")
                     valid_selection = False
-                if clin not in ["1", "2", "3", "4"]:
-                    st.error(f"Central Coast does not have clinical group {clin}")
-                    valid_selection = False
+            clin, comm = "12", "Z"
 
             go = False
 
-            col11, col12 = st.columns(2)
-
-            if valid_selection and pbl:
-                with col11:
-                    go = st.button("Start converting", use_container_width=True)
-            else:
-                st.warning(f"Select your timetable.")
-
-            if go and valid_selection:
-                saved = process_xlsx(pbl.upper(), clin, campus, ws)
-                generate_cal(saved, date_start, date_end, dates)
-
-                if os.path.exists("calendar.ics"):
-                    f = open("calendar.ics", "r")
-
-                    with col12:
-                        st.download_button("Download ics file", data=f, file_name="Calendar.ics", use_container_width=True)
-
-                    st.text(
-                        "Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. DM me @photogrudesh on Instagram if there are any issues.")
-
-        elif university == "University of New England (beta)":
-
-            column1, column2 = st.columns(2)
-
-            if option == "Custom dates":
-                with column1:
-                    date_start = st.date_input("Date to import from (inclusive)", value="today", min_value=None,
-                                               max_value=None,
-                                               format="DD/MM/YYYY", key="dsi")
-                with column2:
-                    date_end = st.date_input("Last date to import (inclusive)", value="today", min_value=None,
-                                             max_value=None,
-                                             format="DD/MM/YYYY", key="dei")
+        elif uni_format == "University of New England":
 
             pbl = st.selectbox("PBL group", ("A", "B", "C", "D", "E", "F", "G", "H", "I"),
                            index=None,
                            placeholder="Select PBL group")
 
-            with column1:
-                clin = st.selectbox("Clin group", ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"),
-                                   index=None,
-                                   placeholder="Select clin group")
-            with column2:
-                comm = st.selectbox("Comm group", ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"),
-                                   index=None,
-                                   placeholder="Select comm group")
+            colclin, colcomm = st.columns(2)
+
+            with colclin:
+                clin = st.selectbox("Clin group", ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"), index=None, placeholder="Select clin group")
+            with colcomm:
+                comm = st.selectbox("Comm group", ("A", "B", "C", "D", "E", "F", "G", "H", "I"), index=None, placeholder="Select comm group")
 
             if option == "All events":
                 st.text(f"Importing all available events from {file}")
@@ -157,171 +119,99 @@ def main():
             elif option == "Current week":
                 st.text("Importing JMP week 17: 27/07/2025-2/08/2025")
 
-            go = False
+            if clin and comm and pbl:
+                valid_selection = True
 
-            col11, col12 = st.columns(2)
-
-            if pbl and clin and comm:
-                with col11:
-                    go = st.button("Start converting", use_container_width=True)
-            else:
-                st.warning(f"Select your timetable.")
-
-            if go and pbl and clin and comm:
-                saved = process_xlsx_une(pbl.upper(), clin, comm, ws)
-                generate_cal_une(saved, date_start, date_end, dates)
-
-                if os.path.exists("calendar.ics"):
-                    f = open("calendar.ics", "r")
-
-                    with col12:
-                        st.download_button("Download ics file", data=f, file_name="Calendar.ics",
-                                           use_container_width=True)
-
-                    st.text(
-                        "Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. DM me @photogrudesh on Instagram if there are any issues.")
+        go = False
 
 
-def process_xlsx_une(pbl, clin, comm, ws):
-    title_row = 2
+        if valid_selection and pbl:
+            go = st.button("Start converting", use_container_width=True)
+            st.text("Always check the output below for errors and double check calendar events with the spreadsheet on canvas. Scroll down to download the file when it's ready.")
+        else:
+            st.warning(f"Select your timetable.")
+
+        if go and valid_selection:
+            saved = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws)
+            generate_cal(saved, date_start, date_end, dates, uni_format)
+
+            if os.path.exists("calendar.ics"):
+                f = open("calendar.ics", "r")
+
+                st.download_button("Download ics file", data=f, file_name="Calendar.ics", use_container_width=True)
+
+                st.text(
+                    "Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. DM me @photogrudesh on Instagram if there are any issues.")
+
+
+def cal_index(campus, item):
+    if campus == "University of Newcastle":
+        match item:
+            case "week":
+                return 0
+            case "day":
+                return 1
+            case "date":
+                return 2
+            case "time":
+                return 3
+            case "campus":
+                return 5
+            case "group":
+                return 6
+            case "venue":
+                return 7
+            case "attendance":
+                return 8
+            case "type":
+                return 9
+            case "domain":
+                return 10
+            case "session":
+                return 11
+            case "staff":
+                return 12
+            case "updates":
+                return 13
+    elif campus == "University of New England":
+        match item:
+            case "week":
+                return 0
+            case "day":
+                return 1
+            case "date":
+                return 2
+            case "time":
+                return 3
+            case "campus":
+                return 6
+            case "group":
+                return 5
+            case "venue":
+                return 6
+            case "attendance":
+                return 10
+            case "type":
+                return 9
+            case "domain":
+                return 8
+            case "session":
+                return 7
+            case "staff":
+                return 11
+            case "updates":
+                return 12
+    return None
+
+
+def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
+    title_row = 1
     titles = []
 
     for i in range(1, 15):
         titles.append(ws.cell(row=title_row, column=i).value)
 
     print(titles)
-
-    # ['WEEK', 'DATE', 'DAY', 'TIME', 'DURATION', 'GROUPS', 'VENUE', 'TYPE', 'Attendance (M - Mandatory)', 'SESSION', 'PRESENTER', None, None, None]
-
-    events = []
-    saved = []
-
-    row_num = title_row + 1
-
-    for row in ws.iter_rows(min_row=title_row + 1, max_row=ws.max_row, max_col=12, values_only=True):
-        events.append(row)
-
-    for i in events:
-        i = list(i)
-        keep = False
-        students = str(i[5])
-        if "ALL" in students:
-            keep = True
-        elif students.startswith("PBL"):
-            if bool(re.search(rf'(?<!\w){re.escape(pbl)}(?!\w)', students)):
-                keep = True
-        elif students.startswith("CLIN"):
-            if bool(re.search(rf'(?<!\d){clin}(?!\d)', students)):
-                keep = True
-        elif students.startswith("COMM"):
-            if bool(re.search(rf'(?<!\d){comm}(?!\d)', students)):
-                keep = True
-        elif i[7] == "Anatomy Lab":
-            keep = True
-        elif students == pbl:
-            keep = True
-
-        if "Zoom" in str(i[6]):
-            try:
-                i[7] = ws.cell(row=row_num, column=8).hyperlink.target
-            except AttributeError:
-                pass
-
-        if keep:
-            saved.append(i)
-            print(i)
-        row_num += 1
-
-    return saved
-
-
-def generate_cal_une(events, date_start, date_end, dates):
-    cal = Calendar()
-    cal['version'] = '2.0'
-    cal.add("prodid", "-//photogrudesh//JMPCalendarConverter//EN")
-    cal.add("summary", "JMP schedule")
-
-    with st.status("Importing events..."):
-        if not dates:
-            for i in events:
-                if date_start - datetime.timedelta(days=1) < i[1].date() < date_end + datetime.timedelta(days=1):
-                    event = Event()
-                    no_time = False
-
-                    try:
-                        start, end = convert_datetime(i[1], i[3])
-                        event.add('dtstart', start)
-                        event.add('dtend', end)
-                    except TypeError:
-                        no_time = True
-
-                    if i[8] is None:
-                        attendance = "N/A"
-                    else:
-                        attendance = i[8]
-
-                    desc = f"{i[7]}\n{i[6]}\nStudents: {i[5]}\nAttendance: {attendance}\nStaff: {i[10]}\nUpdates: {i[11]}"
-
-                    print(i[1])
-
-                    if no_time:
-                        event.add('dtstart', i[1])
-                        event.add('dtend', i[1] + datetime.timedelta(days=1))
-
-                    event.add('summary', i[9])
-                    event.add("description", desc)
-                    cal.add_component(event)
-                    if not no_time:
-                        st.write(f"{start}: " + i[9].replace('\n', ' '))
-                    else:
-                        st.write(i[9].replace('\n', ' '))
-
-        elif dates:
-            for i in events:
-                for j in dates:
-                    if i[3].date() == j:
-                        event = Event()
-                        no_time = False
-
-                        try:
-                            start, end = convert_datetime(i[1], i[3])
-                            event.add('dtstart', start)
-                            event.add('dtend', end)
-                        except TypeError:
-                            no_time = True
-
-                        if i[8] is None:
-                            attendance = "N/A"
-                        else:
-                            attendance = i[8]
-
-                        desc = f"{i[7]}\n{i[6]}\nStudents: {i[5]}\nAttendance: {attendance}\nStaff: {i[10]}\nUpdates: {i[11]}"
-
-                        if no_time:
-                            event.add('dtstart', i[2])
-                            event.add('dtend', i[2] + datetime.timedelta(days=1))
-
-                        event.add('summary', i[9])
-                        event.add("description", desc)
-
-                        cal.add_component(event)
-                        if not no_time:
-                            st.write(f"{start}: " + i[9].replace('\n', ' '))
-                        else:
-                            st.write(i[9].replace('\n', ' '))
-
-    with open("calendar.ics", "wb") as f:
-        f.write(cal.to_ical())
-
-
-def process_xlsx(pbl, clin, campus, ws):
-    title_row = 3
-    titles = []
-
-    for i in range(1, 15):
-        titles.append(ws.cell(row=title_row, column=i).value)
-
-    # ['Campus', 'JMP Week', 'Day', 'Date', 'Time', 'Duration', 'Students', 'Venue', 'Type', 'Domain', 'Attendance\n(M =\nmandatory)', 'Name of Activity ', 'Staff', 'Update']
 
     events = []
     saved = []
@@ -334,106 +224,171 @@ def process_xlsx(pbl, clin, campus, ws):
     for i in events:
         i = list(i)
         keep = False
-        students = str(i[6])
-        if "ALL" in students:
+        group = str(i[cal_index(uni_format, "group")]).strip()
+        print(group, pbl)
+        if "ALL" in group:
             keep = True
-        elif students.startswith("PBL"):
-            if bool(re.search(rf'(?<!\w){re.escape(pbl)}(?!\w)', students)):
+        elif group.startswith("PBL"):
+            if bool(re.search(rf'(?<!\w){re.escape(pbl)}(?!\w)', group)):
                 keep = True
-        elif students.startswith("CLIN"):
-            if bool(re.search(rf'(?<!\d){clin}(?!\d)', students)):
+            if "-" in group:
+                start_char = group[group.index("-") - 1]
+                end_char = group[group.index("-") + 1]
+                for x in [chr(c) for c in range(ord(start_char), ord(end_char) + 1)]:
+                    if pbl == str(x):
+                        keep = True
+            elif "," in group:
+                pbls = group.split(",")
+                for f in pbls:
+                    if f.strip() == pbl:
+                        keep = True
+        elif len(group) == 1:
+            if group == pbl:
                 keep = True
+        elif group.startswith("Clin"):
+            if bool(re.search(rf'(?<!\w){re.escape(clin)}(?!\w)', group)):
+                keep = True
+            if "-" in group:
+                start, end = group.split("-")
+                start_num = ""
+                end_num = ""
+                clin_groups = []
+                for n in start:
+                    if n.isdigit():
+                        start_num += n
+                start_num = int(start_num)
+                for n in end:
+                    if n.isdigit():
+                        end_num += n
+                end_num = int(end_num)
+                for n in range(start_num, end_num + 1):
+                    clin_groups.append(str(n))
+                print(clin_groups)
+                if clin in clin_groups:
+                    keep = True
 
-        if "Zoom" in str(i[7]):
+            elif "," in group:
+                pbls = group.split(",")
+                for f in pbls:
+                    if f.strip() == pbl:
+                        keep = True
+
+        elif group.startswith("Comms"):
+            if bool(re.search(rf'(?<!\w){re.escape(comm)}(?!\w)', group)):
+                keep = True
+            if "-" in group:
+                start_char = group[group.index("-") - 1]
+                end_char = group[group.index("-") + 1]
+                for x in [chr(c) for c in range(ord(start_char), ord(end_char) + 1)]:
+                    if pbl == str(x):
+                        keep = True
+            elif "," in group:
+                comms = group.split(",")
+                for f in comms:
+                    if f.strip() == comm:
+                        keep = True
+
+        if "Zoom" in str(i[cal_index(uni_format, "venue")]):
             try:
-                i[7] = ws.cell(row=row_num, column=8).hyperlink.target
+                i[cal_index(uni_format, "group")] = ws.cell(row=row_num, column=8).hyperlink.target
             except AttributeError:
                 pass
 
-        if campus not in str(i[0]):
-            keep = False
+        if uni_format == "University of Newcastle":
+            campus_code = None
+            if campus == "Callaghan":
+                campus_code = "CAL"
+            elif campus == "Central Coast":
+                campus_code = "CC"
+            if campus_code not in str(i[cal_index(uni_format, "campus")]):
+                keep = False
 
         if keep:
             saved.append(i)
         row_num += 1
+        print(i, keep)
 
     return saved
 
 
-def generate_cal(events, date_start, date_end, dates):
+def generate_cal(events, date_start, date_end, dates, uni_format):
     cal = Calendar()
     cal['version'] = '2.0'
     cal.add("prodid", "-//photogrudesh//JMPCalendarConverter//EN")
     cal.add("summary", "JMP schedule")
 
-    with st.status("Importing events..."):
-
-        if not dates:
-            for i in events:
-                if date_start - datetime.timedelta(days=1) < i[3].date() < date_end + datetime.timedelta(days=1):
-                    event = Event()
-                    no_time = False
-
+    with st.status("Importing events...", expanded=True):
+            if not dates:
+                for i in events:
+                    print(i)
                     try:
-                        start, end = convert_datetime(i[3], i[4])
-                        event.add('dtstart', start)
-                        event.add('dtend', end)
-                    except TypeError:
-                        no_time = True
+                        if date_start - datetime.timedelta(days=1) < i[cal_index(uni_format, "date")].date() < date_end + datetime.timedelta(days=1):
+                            event = Event()
+                            no_time = False
 
-                    if i[10] is None:
-                        attendance = "N/A"
-                    else:
-                        attendance = i[10]
+                            try:
+                                start, end = convert_datetime(i[cal_index(uni_format, "date")], i[cal_index(uni_format, "time")])
+                                event.add('dtstart', start)
+                                event.add('dtend', end)
+                            except TypeError:
+                                no_time = True
 
-                    desc = f"{i[8]}: {i[9]}\n{i[7]}\nStudents: {i[6]}\nAttendance: {attendance}\nStaff: {i[12]}\nUpdates: {i[13]}"
+                            if i[cal_index(uni_format, "attendance")] is None:
+                                attendance = "N/A"
+                            else:
+                                attendance = i[cal_index(uni_format, "attendance")]
 
-                    if no_time:
-                        event.add('dtstart', i[3])
-                        event.add('dtend', i[3] + datetime.timedelta(days=1))
+                            desc = f"{i[cal_index(uni_format, "type")]}: {i[cal_index(uni_format, "domain")]}\n{i[cal_index(uni_format, "venue")]}\nStudents: {i[cal_index(uni_format, "group")]}\nAttendance: {attendance}\nStaff: {i[cal_index(uni_format, "staff")]}\nUpdates: {i[cal_index(uni_format, "updates")]}"
 
-                    event.add('summary', i[11])
-                    event.add("description", desc)
-                    cal.add_component(event)
-                    if not no_time:
-                        st.write(f"{start}: " + i[11].replace('\n', ' '))
-                    else:
-                        st.write(i[11].replace('\n', ' '))
+                            if no_time:
+                                event.add('dtstart', i[cal_index(uni_format, "date")])
+                                event.add('dtend', i[cal_index(uni_format, "date")] + datetime.timedelta(days=1))
 
-        elif dates:
-            for i in events:
-                for j in dates:
-                    if i[3].date() == j:
-                        event = Event()
-                        no_time = False
-
+                            event.add('summary', i[cal_index(uni_format, "session")])
+                            event.add("description", desc)
+                            cal.add_component(event)
+                            if not no_time:
+                                st.write(f"{start}: " + i[cal_index(uni_format, "session")].replace('\n', ' '))
+                            else:
+                                st.write(i[cal_index(uni_format, "session")].replace('\n', ' '))
+                    except AttributeError:
+                        st.error(f"Something went wrong. Check the spreadsheet for information on {i}")
+            elif dates:
+                for i in events:
+                    for j in dates:
                         try:
-                            start, end = convert_datetime(i[3], i[4])
-                            event.add('dtstart', start)
-                            event.add('dtend', end)
-                        except TypeError:
-                            no_time = True
+                            if i[cal_index(uni_format, "date")].date() == j:
+                                event = Event()
+                                no_time = False
 
-                        if i[10] is None:
-                            attendance = "N/A"
-                        else:
-                            attendance = i[10]
+                                try:
+                                    start, end = convert_datetime(i[cal_index(uni_format, "date")],
+                                                                  i[cal_index(uni_format, "time")])
+                                    event.add('dtstart', start)
+                                    event.add('dtend', end)
+                                except TypeError:
+                                    no_time = True
 
-                        desc = f"{i[8]}: {i[9]}\n{i[7]}\nStudents: {i[6]}\nAttendance: {attendance}\nStaff: {i[12]}\nUpdates: {i[13]}"
+                                if i[cal_index(uni_format, "attendance")] is None:
+                                    attendance = "N/A"
+                                else:
+                                    attendance = i[cal_index(uni_format, "attendance")]
 
-                        if no_time:
-                            event.add('dtstart', i[3])
-                            event.add('dtend', i[3] + datetime.timedelta(days=1))
+                                desc = f"{i[cal_index(uni_format, "type")]}: {i[cal_index(uni_format, "domain")]}\n{i[cal_index(uni_format, "venue")]}\nStudents: {i[cal_index(uni_format, "group")]}\nAttendance: {attendance}\nStaff: {i[cal_index(uni_format, "staff")]}\nUpdates: {i[cal_index(uni_format, "updates")]}"
 
-                        event.add('summary', i[11])
-                        event.add("description", desc)
+                                if no_time:
+                                    event.add('dtstart', i[cal_index(uni_format, "date")])
+                                    event.add('dtend', i[cal_index(uni_format, "date")] + datetime.timedelta(days=1))
 
-                        cal.add_component(event)
-                        if not no_time:
-                            st.write(f"{start}: " + i[11].replace('\n', ' '))
-                        else:
-                            st.write(i[11].replace('\n', ' '))
-
+                                event.add('summary', i[cal_index(uni_format, "session")])
+                                event.add("description", desc)
+                                cal.add_component(event)
+                                if not no_time:
+                                    st.write(f"{start}: " + i[cal_index(uni_format, "session")].replace('\n', ' '))
+                                else:
+                                    st.write(i[cal_index(uni_format, "session")].replace('\n', ' '))
+                        except AttributeError:
+                            st.error(f"Something went wrong. Check the spreadsheet for information on {i}")
     with open("calendar.ics", "wb") as f:
         f.write(cal.to_ical())
 
@@ -461,6 +416,6 @@ def convert_datetime(date, time):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    main()
+    main_ui()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
