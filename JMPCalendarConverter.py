@@ -290,7 +290,7 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
 
         if "Zoom" in str(i[cal_index(uni_format, "venue")]):
             try:
-                i[cal_index(uni_format, "group")] = ws.cell(row=row_num, column=8).hyperlink.target
+                i[cal_index(uni_format, "venue")] = ws.cell(row=row_num, column=8).hyperlink.target
             except AttributeError:
                 pass
 
