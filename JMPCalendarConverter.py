@@ -211,8 +211,6 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
     for i in range(1, 15):
         titles.append(ws.cell(row=title_row, column=i).value)
 
-    print(titles)
-
     events = []
     saved = []
 
@@ -225,7 +223,6 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
         i = list(i)
         keep = False
         group = str(i[cal_index(uni_format, "group")]).strip()
-        print(group, pbl)
         if "ALL" in group:
             keep = True
         elif group.startswith("PBL"):
@@ -263,7 +260,6 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
                 end_num = int(end_num)
                 for n in range(start_num, end_num + 1):
                     clin_groups.append(str(n))
-                print(clin_groups)
                 if clin in clin_groups:
                     keep = True
 
@@ -287,14 +283,16 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
                 for f in comms:
                     if f.strip() == comm:
                         keep = True
+        if "zoom" in str(i[cal_index(uni_format, "venue")]).lower():
 
-        if "Zoom" in str(i[cal_index(uni_format, "venue")]):
             zoom_col = 8
             try:
                 if uni_format == "University of New England":
                     zoom_col = 7
                 i[cal_index(uni_format, "venue")] = ws.cell(row=row_num, column=zoom_col).hyperlink.target
+                print(i[cal_index(uni_format, "venue")])
             except AttributeError:
+                print(f"No link for {i}")
                 pass
 
         if uni_format == "University of Newcastle":
@@ -309,8 +307,6 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
         if keep:
             saved.append(i)
         row_num += 1
-        print(i, keep)
-
     return saved
 
 
@@ -323,7 +319,6 @@ def generate_cal(events, date_start, date_end, dates, uni_format):
     with st.status("Importing events...", expanded=True):
             if not dates:
                 for i in events:
-                    print(i)
                     try:
                         if date_start - datetime.timedelta(days=1) < i[cal_index(uni_format, "date")].date() < date_end + datetime.timedelta(days=1):
                             event = Event()
