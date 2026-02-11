@@ -16,7 +16,7 @@ def main_ui():
 
     st.divider()
 
-    university = st.radio("University", ["University of Newcastle", "University of New England", "Use your own file"], horizontal=True)
+    university = st.radio("University - Year 2 only rn", ["University of Newcastle", "University of New England", "Use your own file"], horizontal=True)
     uni_format = None
     file = None
 
