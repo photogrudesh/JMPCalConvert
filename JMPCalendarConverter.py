@@ -10,24 +10,6 @@ import re
 
 def format_selection(university):
     uni_format = None
-    if university == "University of Newcastle Y1 SEM 2 2025":
-        uni_format = {"preset": "University of Newcastle Y1 SEM 2 2025",
-                      "uni": "UON",
-                      "day": 1,
-                      "date": 2,
-                      "time": 3,
-                      "campus": 5,
-                      "group": 6,
-                      "venue": 7,
-                      "attendance": 8,
-                      "type": 9,
-                      "domain": 10,
-                      "session": 11,
-                      "staff": 12,
-                      "updates": 13,
-                      "fields": ["pbl"]
-                    }
-
     if university == "University of Newcastle Y2 2026":
         uni_format = {"preset": "University of Newcastle Y2 2026",
                       "uni": "UON",
