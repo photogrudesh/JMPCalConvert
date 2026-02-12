@@ -245,10 +245,6 @@ def main_ui():
 
         if option == "All events":
             st.text(f"Importing all available events from {file}")
-        elif option == "Suggested dates":
-            st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
-        elif option == "Current week":
-            st.text("Importing JMP week 17: 27/07/2025-2/08/2025")
 
         if clin and comm and pbl:
             valid_selection = True
@@ -265,6 +261,7 @@ def main_ui():
         if go and valid_selection:
             saved = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws)
             converted = generate_cal(saved, date_start, date_end, uni_format)
+            print(f"{uni_format['uni']} Calendar converted: PBL: {pbl} clin: {clin} comm: {comm}")
 
             if os.path.exists("calendar.ics"):
                 f = open("calendar.ics", "r")
