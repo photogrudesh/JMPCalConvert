@@ -1,5 +1,4 @@
 import os
-from logging import exception
 
 import streamlit as st
 import openpyxl
@@ -270,12 +269,7 @@ def main_ui():
             if os.path.exists("calendar.ics"):
                 f = open("calendar.ics", "r")
 
-                dl_col, l_col = st.columns(2)
-
-                with dl_col:
-                    st.download_button("Download ics file", data=f, file_name="Calendar.ics", use_container_width=True)
-                with l_col:
-                    st.link_button("Import to Google Calendar", url="https://calendar.google.com/calendar/u/0/r/settings/export", use_container_width=True)
+                st.download_button("Download ics file", data=f, file_name="Calendar.ics", use_container_width=True)
 
                 st.text(
                     f"Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. {converted} events were converted by the converter. If google calendar doesn't import the same number of events, check the spreadsheet. DM me @photogrudesh on Instagram if there are any issues.")
