@@ -265,7 +265,7 @@ def main_ui():
 
         if go and valid_selection:
             saved = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws)
-            generate_cal(saved, date_start, date_end, uni_format)
+            converted = generate_cal(saved, date_start, date_end, uni_format)
 
             if os.path.exists("calendar.ics"):
                 f = open("calendar.ics", "r")
@@ -278,7 +278,7 @@ def main_ui():
                     st.link_button("Import to Google Calendar", url="https://calendar.google.com/calendar/u/0/r/settings/export", use_container_width=True)
 
                 st.text(
-                    f"Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. {len(saved)} events were converted by the converter. If google calendar doesn't import the same number of events, check the spreadsheet. DM me @photogrudesh on Instagram if there are any issues.")
+                    f"Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. {converted} events were converted by the converter. If google calendar doesn't import the same number of events, check the spreadsheet. DM me @photogrudesh on Instagram if there are any issues.")
 
 
 
@@ -408,8 +408,9 @@ def generate_cal(events, date_start, date_end, uni_format):
     cal['version'] = '2.0'
     cal.add("prodid", "-//photogrudesh//JMPCalendarConverter//EN")
     cal.add("summary", "JMP schedule")
+    converted = 0
 
-    with st.status(f"Importing {len(events)} events...", expanded=True):
+    with st.status(f"Importing events...", expanded=True):
         for i in events:
             try:
                 if date_start - datetime.timedelta(days=1) < i[uni_format["date"]].date() < date_end + datetime.timedelta(days=1):
@@ -443,12 +444,14 @@ def generate_cal(events, date_start, date_end, uni_format):
                     else:
                         with st.status(i[uni_format["session"]].replace('\n', ' ')):
                             st.write(desc)
+                    converted += 1
             except AttributeError as e:
                 print(e)
                 st.error(f"Something went wrong. Check the spreadsheet for information on {i}\n{e}")
 
     with open("calendar.ics", "wb") as f:
         f.write(cal.to_ical())
+    return converted
 
 
 def convert_datetime(date, time):
