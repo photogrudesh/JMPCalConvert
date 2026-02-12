@@ -10,6 +10,24 @@ import re
 
 def format_selection(university):
     uni_format = None
+    if university == "University of Newcastle Y1 SEM 2 2025":
+        uni_format = {"preset": "University of Newcastle Y1 SEM 2 2025",
+                      "uni": "UON",
+                      "day": 1,
+                      "date": 2,
+                      "time": 3,
+                      "campus": 5,
+                      "group": 6,
+                      "venue": 7,
+                      "attendance": 8,
+                      "type": 9,
+                      "domain": 10,
+                      "session": 11,
+                      "staff": 12,
+                      "updates": 13,
+                      "fields": ["pbl"]
+                    }
+
     if university == "University of Newcastle Y2 2026":
         uni_format = {"preset": "University of Newcastle Y2 2026",
                       "uni": "UON",
@@ -58,7 +76,7 @@ def main_ui():
     st.divider()
 
     if not st.toggle("Use your own file"):
-        university = st.selectbox("Preset calendar - Year 2 only rn", ["University of Newcastle Y1 SEM 2 2025", "University of Newcastle Y2 2026", "University of New England Y2 2026"])
+        university = st.selectbox("Preset calendar - Year 2 only rn", ["University of Newcastle Y2 2026", "University of New England Y2 2026"])
     else:
         university = "Use your own file"
 
@@ -374,6 +392,7 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
                 campus_code = "CC"
             if campus_code not in str(i[uni_format["campus"]]):
                 keep = False
+
         elif not uni_format["preset"]:
             campus_code = uni_format["campus_code"]
             if campus_code not in str(i[uni_format["campus"]]):
