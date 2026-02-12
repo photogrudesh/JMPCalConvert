@@ -162,6 +162,13 @@ def main_ui():
 
             st.info(f"Your settings right now:\n{uni_format}")
 
+            if uni_format['day'] == 20:
+                if os.path.exists("log.jccl"):
+                    f = open("log.jccl", "r")
+                    st.download_button("Download log file", data=f, file_name="log.jccl", use_container_width=True)
+                else:
+                    st.error("log not found")
+
             if uni_format['fields']:
                 pass
             else:
@@ -261,7 +268,10 @@ def main_ui():
         if go and valid_selection:
             saved = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws)
             converted = generate_cal(saved, date_start, date_end, uni_format)
-            print(f"{uni_format['uni']} Calendar converted: PBL: {pbl} clin: {clin} comm: {comm}")
+            if os.path.exists("log.jccl"):
+                with open("log.jccl", "w") as l:
+                    log = f"{datetime.datetime.now()}: {uni_format['uni']} Calendar converted PBL: {pbl} clin: {clin} comm: {comm}\n\n"
+                    l.write(log)
 
             if os.path.exists("calendar.ics"):
                 f = open("calendar.ics", "r")
