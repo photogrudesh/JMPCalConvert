@@ -159,15 +159,14 @@ def main_ui():
                 uni_format['campus_code'] = st.text_input(
                     "Enter the campus you go to as shown on the spreadsheet. e.g. CAL/CC or Callaghan/Central Coast.")
 
-            verify_columns = st.button("Press to verify that your column settings are correct")
+            # verify_columns = st.button("Press to verify that your column settings are correct")
 
             st.info(f"Your settings right now:\n{uni_format}")
 
             if uni_format['fields']:
-                if verify_columns:
-                    pass
+                pass
             else:
-                st.error("Fill your title row settings correctly")
+                st.error("Fill your settings correctly")
                 valid_custom = False
         else:
             uni_format = format_selection(uni_format_select)
