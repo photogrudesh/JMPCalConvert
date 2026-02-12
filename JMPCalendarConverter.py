@@ -1,4 +1,5 @@
 import os
+from logging import exception
 
 import streamlit as st
 import openpyxl
@@ -7,6 +8,64 @@ import datetime
 import parsedatetime as pdt
 import re
 
+def format_selection(university):
+    uni_format = None
+    if university == "University of Newcastle Y1 SEM 2 2025":
+        uni_format = {"preset": "University of Newcastle Y1 SEM 2 2025",
+                      "uni": "UON",
+                      "day": 1,
+                      "date": 2,
+                      "time": 3,
+                      "campus": 5,
+                      "group": 6,
+                      "venue": 7,
+                      "attendance": 8,
+                      "type": 9,
+                      "domain": 10,
+                      "session": 11,
+                      "staff": 12,
+                      "updates": 13,
+                      "fields": ["pbl"]
+                    }
+
+    if university == "University of Newcastle Y2 2026":
+        uni_format = {"preset": "University of Newcastle Y2 2026",
+                      "uni": "UON",
+                      "day": 1,
+                      "date": 2,
+                      "time": 3,
+                      "campus": 5,
+                      "group": 6,
+                      "venue": 7,
+                      "attendance": 8,
+                      "type": 9,
+                      "domain": 10,
+                      "session": 11,
+                      "staff": 12,
+                      "updates": 13,
+                      "fields": ["pbl"]
+                    }
+
+
+    if university == "University of New England Y2 2026":
+        uni_format = {
+                      "preset": "University of New England Y2 2026",
+                      "uni": "UNE",
+                      "day": 1,
+                      "date": 2,
+                      "time": 3,
+                      "campus": 6,
+                      "group": 5,
+                      "venue": 6,
+                      "attendance": 10,
+                      "type": 9,
+                      "domain": 8,
+                      "session": 7,
+                      "staff": 11,
+                      "updates": 12,
+                      "fields": ["pbl", "clin", "comm"]
+                      }
+    return uni_format
 
 def main_ui():
     st.set_page_config(page_title="JMPCalendarConverter")
@@ -16,8 +75,11 @@ def main_ui():
 
     st.divider()
 
-    university = st.radio("University - Year 2 only rn", ["University of Newcastle", "University of New England", "Use your own file"], horizontal=True)
-    uni_format = None
+    if not st.toggle("Use your own file"):
+        university = st.selectbox("Preset calendar - Year 2 only rn", ["University of Newcastle Y1 SEM 2 2025", "University of Newcastle Y2 2026", "University of New England Y2 2026"])
+    else:
+        university = "Use your own file"
+
     file = None
 
     files = os.listdir()
@@ -31,26 +93,90 @@ def main_ui():
             elif f.startswith("UNEARM"):
                 unecals.append(f)
 
-    if university == "University of Newcastle":
-        file = st.selectbox("Select a UON timetable", uoncals, placeholder="Select timetable")
-        uni_format = "University of Newcastle"
+    uni_format = format_selection(university)
+    if uni_format:
+        if uni_format["uni"] == "UON":
+            file = st.selectbox("Select file", uoncals)
+        elif uni_format["uni"] == "UNE":
+            file = st.selectbox("Select file", unecals)
 
-    if university == "University of New England":
-        file = st.selectbox("Select a UNE timetable", unecals, placeholder="Select timetable")
-        uni_format = "University of New England"
-
+    valid_custom = True
 
     if university == "Use your own file":
         file = st.file_uploader("Upload your own calendar file", type=None, accept_multiple_files=False)
-        uni_format = st.radio("Format",
-                              ["University of Newcastle", "University of New England"], horizontal=True)
+        uni_format_select = st.radio("Format",
+                              ["University of Newcastle Y2 2026", "University of New England Y2 2026", "custom"], horizontal=True)
+        if uni_format_select == "custom":
+            st.text("Be careful with these settings. If they're not perfect, your calendar will not convert. Enter the column that correlates with each attribute. Starting at 0 for A, left to right. Then set your title row. This is the row which contains the headings for each column. This number lines up exactly with Excel.")
+            uni_format = {
+             "preset": None,
+             "uni": None,
+             "day": None,
+             "date": None,
+             "time": None,
+             "campus": None,
+             "campus_code": None,
+             "group": None,
+             "venue": None,
+             "attendance": None,
+             "type": None,
+             "domain": None,
+             "session": None,
+             "staff": None,
+             "updates": None,
+             "fields": None
+             }
 
-    dates = []
+            col_cust1, col_cust2, col_cust3, col_cust4, col_cust5, col_cust6 = st.columns(6)
+
+            try:
+                with col_cust1:
+                    uni_format["day"] =  st.selectbox("day", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+                    uni_format["date"] = st.selectbox("date", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+                with col_cust2:
+                    uni_format["time"] =  st.selectbox("time", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+                    uni_format["campus"] = st.selectbox("campus", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+                with col_cust3:
+                    uni_format["group"] =  st.selectbox("group", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+                    uni_format["venue"] = st.selectbox("venue", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+                with col_cust4:
+                    uni_format["attendance"] =  st.selectbox("attendance", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+                    uni_format["type"] = st.selectbox("type", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+                with col_cust5:
+                    uni_format["domain"] =  st.selectbox("domain", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+                    uni_format["session"] = st.selectbox("session", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+                with col_cust6:
+                    uni_format["staff"] =  st.selectbox("staff", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+                    uni_format["updates"] = st.selectbox("updates", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+            except ValueError:
+                st.error("Please enter a number")
+
+            uni_format['fields'] = st.segmented_control("Pick the groups that apply to your semester", ["pbl", "clin", "comm"], selection_mode="multi")
+
+            uni_format['uni'] = st.radio("Select your uni", ["UON", "UNE"], horizontal=True)
+
+            if uni_format['uni'] == "UON":
+                uni_format['campus_code'] = st.text_input(
+                    "Enter the campus you go to as shown on the spreadsheet. e.g. CAL/CC or Callaghan/Central Coast.")
+
+            verify_columns = st.button("Press to verify that your column settings are correct")
+
+            st.info(f"Your settings right now:\n{uni_format}")
+
+            if uni_format['fields']:
+                if verify_columns:
+                    pass
+            else:
+                st.error("Fill your title row settings correctly")
+                valid_custom = False
+        else:
+            uni_format = format_selection(uni_format_select)
+
     date_start, date_end = None, None
 
     valid_selection = False
 
-    if file:
+    if file and valid_custom:
         # process file and determine which date ranges are valid
         wb = openpyxl.load_workbook(file)
         ws = wb.active
@@ -62,6 +188,8 @@ def main_ui():
 
         campus = None
         pbl = None
+        clin = None
+        comm = None
 
         column1, column2 = st.columns(2)
 
@@ -79,48 +207,53 @@ def main_ui():
                                          format="DD/MM/YYYY", key="dei")
 
 
-        if uni_format == "University of Newcastle":
+        if uni_format["uni"] == "UON":
             campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
 
-            pbl = st.selectbox("PBL group", (
-                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"),
-                               index=None,
-                               placeholder="Select PBL group")
+        colpbl, colclin, colcomm = st.columns(3)
 
-            valid_selection = True
-
-            if campus == "Callaghan" and pbl and pbl not in ["E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"]:
-                st.error(f"Callaghan does not have PBL group {pbl}")
-                valid_selection = False
-            elif campus == "Central Coast" and pbl and pbl not in ["A", "B", "C", "D"]:
-                    st.error(f"Central Coast does not have PBL group {pbl}")
-                    valid_selection = False
-            clin, comm = "12", "Z"
-
-            go = False
-
-        elif uni_format == "University of New England":
-
-            pbl = st.selectbox("PBL group", ("A", "B", "C", "D", "E", "F", "G", "H", "I"),
-                           index=None,
-                           placeholder="Select PBL group")
-
-            colclin, colcomm = st.columns(2)
-
+        if not st.toggle("Manual entry"):
+            with colpbl:
+                if "pbl" in uni_format["fields"]:
+                    pbl = st.selectbox("PBL group", ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"), index=None, placeholder="Select PBL group")
+                else:
+                    pbl = "z"
             with colclin:
-                clin = st.selectbox("Clin group", ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"), index=None, placeholder="Select clin group")
+                if "clin" in uni_format["fields"]:
+                    clin = st.selectbox("Clin group", ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"), index=None, placeholder="Select clin group")
+                else:
+                    clin = "300"
             with colcomm:
-                comm = st.selectbox("Comm group", ("A", "B", "C", "D", "E", "F", "G", "H", "I"), index=None, placeholder="Select comm group")
+                if "comm" in uni_format["fields"]:
+                    comm = st.selectbox("Comm group", ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"), index=None, placeholder="Select comm group")
+                else:
+                    comm = "z"
+        else:
+            with colpbl:
+                if "pbl" in uni_format["fields"]:
+                    pbl = st.text_input("PBL group", placeholder="Select PBL group")
+                else:
+                    pbl = "z"
+            with colclin:
+                if "clin" in uni_format["fields"]:
+                    clin = st.text_input("Clin group", placeholder="Select clin group")
+                else:
+                    clin = "300"
+            with colcomm:
+                if "comm" in uni_format["fields"]:
+                    comm = st.text_input("Comm group", placeholder="Select comm group")
+                else:
+                    comm = "z"
 
-            if option == "All events":
-                st.text(f"Importing all available events from {file}")
-            elif option == "Suggested dates":
-                st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
-            elif option == "Current week":
-                st.text("Importing JMP week 17: 27/07/2025-2/08/2025")
+        if option == "All events":
+            st.text(f"Importing all available events from {file}")
+        elif option == "Suggested dates":
+            st.text("Importing suggested updates: 21/05/2025-22/05/2025 and 11/06/2025")
+        elif option == "Current week":
+            st.text("Importing JMP week 17: 27/07/2025-2/08/2025")
 
-            if clin and comm and pbl:
-                valid_selection = True
+        if clin and comm and pbl:
+            valid_selection = True
 
         go = False
 
@@ -133,104 +266,46 @@ def main_ui():
 
         if go and valid_selection:
             saved = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws)
-            generate_cal(saved, date_start, date_end, dates, uni_format)
+            generate_cal(saved, date_start, date_end, uni_format)
 
             if os.path.exists("calendar.ics"):
                 f = open("calendar.ics", "r")
 
-                st.download_button("Download ics file", data=f, file_name="Calendar.ics", use_container_width=True)
+                dl_col, l_col = st.columns(2)
+
+                with dl_col:
+                    st.download_button("Download ics file", data=f, file_name="Calendar.ics", use_container_width=True)
+                with l_col:
+                    st.link_button("Import to Google Calendar", url="https://calendar.google.com/calendar/u/0/r/settings/export", use_container_width=True)
 
                 st.text(
-                    "Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. DM me @photogrudesh on Instagram if there are any issues.")
+                    f"Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. {len(saved)} events were converted by the converter. If google calendar doesn't import the same number of events, check the spreadsheet. DM me @photogrudesh on Instagram if there are any issues.")
 
-
-def cal_index(campus, item):
-    if campus == "University of Newcastle":
-        match item:
-            case "week":
-                return 0
-            case "day":
-                return 1
-            case "date":
-                return 2
-            case "time":
-                return 3
-            case "campus":
-                return 5
-            case "group":
-                return 6
-            case "venue":
-                return 7
-            case "attendance":
-                return 8
-            case "type":
-                return 9
-            case "domain":
-                return 10
-            case "session":
-                return 11
-            case "staff":
-                return 12
-            case "updates":
-                return 13
-    elif campus == "University of New England":
-        match item:
-            case "week":
-                return 0
-            case "day":
-                return 1
-            case "date":
-                return 2
-            case "time":
-                return 3
-            case "campus":
-                return 6
-            case "group":
-                return 5
-            case "venue":
-                return 6
-            case "attendance":
-                return 10
-            case "type":
-                return 9
-            case "domain":
-                return 8
-            case "session":
-                return 7
-            case "staff":
-                return 11
-            case "updates":
-                return 12
-    return None
 
 
 def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
-    title_row = 1
-    titles = []
-
-    for i in range(1, 15):
-        titles.append(ws.cell(row=title_row, column=i).value)
-
     events = []
     saved = []
 
-    row_num = title_row + 1
+    row_num = 1
 
-    for row in ws.iter_rows(min_row=title_row + 1, max_row=ws.max_row, max_col=14, values_only=True):
+    for row in ws.iter_rows(min_row=1, max_row=ws.max_row, max_col=20, values_only=True):
         events.append(row)
 
     for i in events:
         i = list(i)
         keep = False
-        group = str(i[cal_index(uni_format, "group")]).strip()
+        group = str(i[uni_format["group"]]).strip()
+        complex_grp = group.split(" ")[-1]
+
         if "ALL" in group:
             keep = True
         elif group.startswith("PBL"):
             if bool(re.search(rf'(?<!\w){re.escape(pbl)}(?!\w)', group)):
                 keep = True
-            if "-" in group:
-                start_char = group[group.index("-") - 1]
-                end_char = group[group.index("-") + 1]
+            if "-" in complex_grp:
+                start_char = complex_grp.split("-")[0].strip()
+                end_char = complex_grp.split("-")[1].strip()
                 for x in [chr(c) for c in range(ord(start_char), ord(end_char) + 1)]:
                     if pbl == str(x):
                         keep = True
@@ -242,11 +317,12 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
         elif len(group) == 1:
             if group == pbl:
                 keep = True
+
         elif group.startswith("Clin"):
             if bool(re.search(rf'(?<!\w){re.escape(clin)}(?!\w)', group)):
                 keep = True
-            if "-" in group:
-                start, end = group.split("-")
+            if "-" in complex_grp:
+                start, end = complex_grp.split("-")
                 start_num = ""
                 end_num = ""
                 clin_groups = []
@@ -272,9 +348,9 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
         elif group.startswith("Comms"):
             if bool(re.search(rf'(?<!\w){re.escape(comm)}(?!\w)', group)):
                 keep = True
-            if "-" in group:
-                start_char = group[group.index("-") - 1]
-                end_char = group[group.index("-") + 1]
+            if "-" in complex_grp:
+                start_char = complex_grp.split("-")[0].strip()
+                end_char = complex_grp.split("-")[1].strip()
                 for x in [chr(c) for c in range(ord(start_char), ord(end_char) + 1)]:
                     if pbl == str(x):
                         keep = True
@@ -283,25 +359,42 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
                 for f in comms:
                     if f.strip() == comm:
                         keep = True
-        if "zoom" in str(i[cal_index(uni_format, "venue")]).lower():
+        else:
+            if "-" in complex_grp:
+                start_char = complex_grp.split("-")[0].strip()
+                end_char = complex_grp.split("-")[1].strip()
+                for x in [chr(c) for c in range(ord(start_char), ord(end_char) + 1)]:
+                    if pbl == str(x):
+                        keep = True
+            elif "," in group:
+                pbls = group.split(",")
+                for f in pbls:
+                    if f.strip() == pbl:
+                        keep = True
 
+
+        if "zoom" in str(i[uni_format["venue"]]).lower():
             zoom_col = 8
             try:
-                if uni_format == "University of New England":
+                if uni_format["preset"] == "University of New England Y2 2026":
                     zoom_col = 7
-                i[cal_index(uni_format, "venue")] = ws.cell(row=row_num, column=zoom_col).hyperlink.target
-                print(i[cal_index(uni_format, "venue")])
+                i[uni_format["venue"]] = ws.cell(row=row_num, column=zoom_col).hyperlink.target
+                print(i[uni_format["venue"]])
             except AttributeError:
                 print(f"No link for {i}")
-                pass
+                i[uni_format["venue"]] = str(i[uni_format["venue"]]) + ": Failed hyperlink extraction. Check spreadsheet."
 
-        if uni_format == "University of Newcastle":
+        if uni_format["preset"] == "University of Newcastle Y2 2026":
             campus_code = None
             if campus == "Callaghan":
                 campus_code = "CAL"
             elif campus == "Central Coast":
                 campus_code = "CC"
-            if campus_code not in str(i[cal_index(uni_format, "campus")]):
+            if campus_code not in str(i[uni_format["campus"]]):
+                keep = False
+        elif not uni_format["preset"]:
+            campus_code = uni_format["campus_code"]
+            if campus_code not in str(i[uni_format["campus"]]):
                 keep = False
 
         if keep:
@@ -310,83 +403,50 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
     return saved
 
 
-def generate_cal(events, date_start, date_end, dates, uni_format):
+def generate_cal(events, date_start, date_end, uni_format):
     cal = Calendar()
     cal['version'] = '2.0'
     cal.add("prodid", "-//photogrudesh//JMPCalendarConverter//EN")
     cal.add("summary", "JMP schedule")
 
-    with st.status("Importing events...", expanded=True):
-            if not dates:
-                for i in events:
+    with st.status(f"Importing {len(events)} events...", expanded=True):
+        for i in events:
+            try:
+                if date_start - datetime.timedelta(days=1) < i[uni_format["date"]].date() < date_end + datetime.timedelta(days=1):
+                    event = Event()
+                    no_time = False
+
                     try:
-                        if date_start - datetime.timedelta(days=1) < i[cal_index(uni_format, "date")].date() < date_end + datetime.timedelta(days=1):
-                            event = Event()
-                            no_time = False
+                        start, end = convert_datetime(i[uni_format["date"]], i[uni_format["time"]])
+                        event.add('dtstart', start)
+                        event.add('dtend', end)
+                    except TypeError:
+                        no_time = True
 
-                            try:
-                                start, end = convert_datetime(i[cal_index(uni_format, "date")], i[cal_index(uni_format, "time")])
-                                event.add('dtstart', start)
-                                event.add('dtend', end)
-                            except TypeError:
-                                no_time = True
+                    if i[uni_format["attendance"]] is None:
+                        attendance = "N/A"
+                    else:
+                        attendance = i[uni_format["attendance"]]
 
-                            if i[cal_index(uni_format, "attendance")] is None:
-                                attendance = "N/A"
-                            else:
-                                attendance = i[cal_index(uni_format, "attendance")]
+                    desc = f"{i[uni_format["type"]]}: {i[uni_format["domain"]]}\n{i[uni_format["venue"]]}\nStudents: {i[uni_format["group"]]}\nAttendance: {attendance}\nStaff: {i[uni_format["staff"]]}\nUpdates: {i[uni_format["updates"]]}"
 
-                            desc = f"{i[cal_index(uni_format, "type")]}: {i[cal_index(uni_format, "domain")]}\n{i[cal_index(uni_format, "venue")]}\nStudents: {i[cal_index(uni_format, "group")]}\nAttendance: {attendance}\nStaff: {i[cal_index(uni_format, "staff")]}\nUpdates: {i[cal_index(uni_format, "updates")]}"
+                    if no_time:
+                        event.add('dtstart', i[uni_format["date"]])
+                        event.add('dtend', i[uni_format["date"]] + datetime.timedelta(days=1))
 
-                            if no_time:
-                                event.add('dtstart', i[cal_index(uni_format, "date")])
-                                event.add('dtend', i[cal_index(uni_format, "date")] + datetime.timedelta(days=1))
+                    event.add('summary', i[uni_format["session"]])
+                    event.add("description", desc)
+                    cal.add_component(event)
+                    if not no_time:
+                        with st.status(f"{start}: " + i[uni_format["session"]].replace('\n', ' ')):
+                            st.write(desc)
+                    else:
+                        with st.status(i[uni_format["session"]].replace('\n', ' ')):
+                            st.write(desc)
+            except AttributeError as e:
+                print(e)
+                st.error(f"Something went wrong. Check the spreadsheet for information on {i}\n{e}")
 
-                            event.add('summary', i[cal_index(uni_format, "session")])
-                            event.add("description", desc)
-                            cal.add_component(event)
-                            if not no_time:
-                                st.write(f"{start}: " + i[cal_index(uni_format, "session")].replace('\n', ' '))
-                            else:
-                                st.write(i[cal_index(uni_format, "session")].replace('\n', ' '))
-                    except AttributeError:
-                        st.error(f"Something went wrong. Check the spreadsheet for information on {i}")
-            elif dates:
-                for i in events:
-                    for j in dates:
-                        try:
-                            if i[cal_index(uni_format, "date")].date() == j:
-                                event = Event()
-                                no_time = False
-
-                                try:
-                                    start, end = convert_datetime(i[cal_index(uni_format, "date")],
-                                                                  i[cal_index(uni_format, "time")])
-                                    event.add('dtstart', start)
-                                    event.add('dtend', end)
-                                except TypeError:
-                                    no_time = True
-
-                                if i[cal_index(uni_format, "attendance")] is None:
-                                    attendance = "N/A"
-                                else:
-                                    attendance = i[cal_index(uni_format, "attendance")]
-
-                                desc = f"{i[cal_index(uni_format, "type")]}: {i[cal_index(uni_format, "domain")]}\n{i[cal_index(uni_format, "venue")]}\nStudents: {i[cal_index(uni_format, "group")]}\nAttendance: {attendance}\nStaff: {i[cal_index(uni_format, "staff")]}\nUpdates: {i[cal_index(uni_format, "updates")]}"
-
-                                if no_time:
-                                    event.add('dtstart', i[cal_index(uni_format, "date")])
-                                    event.add('dtend', i[cal_index(uni_format, "date")] + datetime.timedelta(days=1))
-
-                                event.add('summary', i[cal_index(uni_format, "session")])
-                                event.add("description", desc)
-                                cal.add_component(event)
-                                if not no_time:
-                                    st.write(f"{start}: " + i[cal_index(uni_format, "session")].replace('\n', ' '))
-                                else:
-                                    st.write(i[cal_index(uni_format, "session")].replace('\n', ' '))
-                        except AttributeError:
-                            st.error(f"Something went wrong. Check the spreadsheet for information on {i}")
     with open("calendar.ics", "wb") as f:
         f.write(cal.to_ical())
 
