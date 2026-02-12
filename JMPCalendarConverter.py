@@ -268,10 +268,9 @@ def main_ui():
         if go and valid_selection:
             saved = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws)
             converted = generate_cal(saved, date_start, date_end, uni_format)
-            if os.path.exists("log.jccl"):
-                with open("log.jccl", "w") as l:
-                    log = f"{datetime.datetime.now()}: {uni_format['uni']} Calendar converted PBL: {pbl} clin: {clin} comm: {comm}\n\n"
-                    l.write(log)
+            with open("log.jccl", "w") as l:
+                log = f"{datetime.datetime.now()}: {uni_format['uni']} Calendar converted PBL: {pbl} clin: {clin} comm: {comm}\n\n"
+                l.write(log)
 
             if os.path.exists("calendar.ics"):
                 f = open("calendar.ics", "r")
