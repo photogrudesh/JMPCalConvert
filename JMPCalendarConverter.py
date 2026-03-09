@@ -189,7 +189,7 @@ def main_ui():
         st.divider()
         st.subheader("Options")
 
-        option = st.radio("Convert", ["All events", "Custom dates"], horizontal=True)
+        option = st.radio("Convert", ["All events", "Today onwards", "Custom dates"], horizontal=True)
 
         campus = None
         pbl = None
@@ -201,6 +201,13 @@ def main_ui():
         if option == "All events":
             date_start = datetime.date(1970, 1, 1)
             date_end = datetime.date(3000, 1, 1)
+        elif option == "> date":
+            with column1:
+                date_start = st.date_input("Date to import from (inclusive)", value="today", min_value=None,
+                                           max_value=None,
+                                           format="DD/MM/YYYY", key="dsi")
+                date_end = datetime.date(3000, 1, 1)
+
         elif option == "Custom dates":
             with column1:
                 date_start = st.date_input("Date to import from (inclusive)", value="today", min_value=None,
