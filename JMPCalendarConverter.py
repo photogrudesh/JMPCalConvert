@@ -93,11 +93,18 @@ def main_ui():
                 unecals.append(f)
 
     uni_format = format_selection(university)
-    if uni_format:
-        if uni_format["uni"] == "UON":
-            file = st.selectbox("Select file", uoncals)
-        elif uni_format["uni"] == "UNE":
-            file = st.selectbox("Select file", unecals)
+
+    file_select, file_dl = st.columns(2)
+
+    with file_dl:
+        if uni_format:
+            if uni_format["uni"] == "UON":
+                file = st.selectbox("Select file", uoncals)
+            elif uni_format["uni"] == "UNE":
+                file = st.selectbox("Select file", unecals)
+    with file_dl:
+        if file:
+            st.download_button("Download spreadsheet", file)
 
     valid_custom = True
 
