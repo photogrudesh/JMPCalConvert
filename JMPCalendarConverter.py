@@ -99,9 +99,9 @@ def main_ui():
     with file_select:
         if uni_format:
             if uni_format["uni"] == "UON":
-                file = st.selectbox("Select file", uoncals)
+                file = st.selectbox("", uoncals)
             elif uni_format["uni"] == "UNE":
-                file = st.selectbox("Select file", unecals)
+                file = st.selectbox("", unecals)
     with file_dl:
         if file:
             st.download_button("Download spreadsheet", file)
