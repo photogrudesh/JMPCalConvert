@@ -96,7 +96,7 @@ def main_ui():
 
     file_select, file_dl = st.columns(2)
 
-    with file_dl:
+    with file_select:
         if uni_format:
             if uni_format["uni"] == "UON":
                 file = st.selectbox("Select file", uoncals)
