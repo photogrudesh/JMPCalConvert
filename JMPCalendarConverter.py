@@ -1,4 +1,5 @@
 import os
+from tkinter.constants import HIDDEN
 
 import streamlit as st
 import openpyxl
@@ -99,9 +100,9 @@ def main_ui():
     with file_select:
         if uni_format:
             if uni_format["uni"] == "UON":
-                file = st.selectbox("", uoncals)
+                file = st.selectbox("uon_file", uoncals, label_visibility="collapsed")
             elif uni_format["uni"] == "UNE":
-                file = st.selectbox("", unecals)
+                file = st.selectbox("une_file", unecals, label_visibility="collapsed")
     with file_dl:
         if file:
             st.download_button("Download spreadsheet", file)
