@@ -104,7 +104,7 @@ def main_ui():
                 file = st.selectbox("une_file", unecals, label_visibility="collapsed")
     with file_dl:
         if file:
-            st.download_button("Download spreadsheet", data=file, file_name=file, use_container_width=True)
+            # st.download_button("Download spreadsheet", data=file, file_name=file, use_container_width=True)
             pass
 
     valid_custom = True
