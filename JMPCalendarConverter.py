@@ -94,7 +94,7 @@ def main_ui():
 
     uni_format = format_selection(university)
 
-    file_select, file_dl = st.columns(2)
+    file_select, file_dl = st.columns([3, 1])
 
     with file_select:
         if uni_format:
