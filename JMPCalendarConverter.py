@@ -312,7 +312,7 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
         group = str(i[uni_format["group"]]).strip()
         complex_grp = group.split(" ")[-1]
 
-        if "ALL" in group:
+        if "all" in group.lower():
             keep = True
         elif group.startswith("PBL"):
             if bool(re.search(rf'(?<!\w){re.escape(pbl)}(?!\w)', group)):
