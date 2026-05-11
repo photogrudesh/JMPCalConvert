@@ -450,14 +450,19 @@ def generate_cal(events, date_start, date_end, uni_format):
                         event.add('dtstart', i[uni_format["date"]])
                         event.add('dtend', i[uni_format["date"]] + datetime.timedelta(days=1))
 
-                    event.add('summary', i[uni_format["session"]])
+                    summary = i[uni_format["session"]]
+
+                    if attendance == "MAND":
+                        summary = summary.strip() + " - MAND"
+
+                    event.add('summary', summary)
                     event.add("description", desc)
                     cal.add_component(event)
                     if not no_time:
-                        with st.status(f"{start}: " + i[uni_format["session"]].replace('\n', ' ')):
+                        with st.status(f"{start}: " + summary.replace('\n', ' ')):
                             st.write(desc)
                     else:
-                        with st.status(i[uni_format["session"]].replace('\n', ' ')):
+                        with st.status(summary.replace('\n', ' ')):
                             st.write(desc)
                     converted += 1
             except AttributeError as e:
