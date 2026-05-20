@@ -95,13 +95,12 @@ def main_ui():
         uni_format = format_selection(uni_format_select)
     else:
         uni_format = format_selection(university)
-
-    with file_select:
-        if uni_format:
-            if uni_format["uni"] == "UON":
-                file = st.selectbox("uon_file", uoncals, label_visibility="collapsed")
-            elif uni_format["uni"] == "UNE":
-                file = st.selectbox("une_file", unecals, label_visibility="collapsed")
+        with file_select:
+            if uni_format:
+                if uni_format["uni"] == "UON":
+                    file = st.selectbox("uon_file", uoncals, label_visibility="collapsed")
+                elif uni_format["uni"] == "UNE":
+                    file = st.selectbox("une_file", unecals, label_visibility="collapsed")
 
 
     valid_custom = True
