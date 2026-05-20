@@ -9,23 +9,6 @@ import re
 
 def format_selection(university):
     uni_format = None
-    if university == "University of Newcastle Y1 SEM 2 2025":
-        uni_format = {"preset": "University of Newcastle Y1 SEM 2 2025",
-                      "uni": "UON",
-                      "day": 1,
-                      "date": 2,
-                      "time": 3,
-                      "campus": 5,
-                      "group": 6,
-                      "venue": 7,
-                      "attendance": 8,
-                      "type": 9,
-                      "domain": 10,
-                      "session": 11,
-                      "staff": 12,
-                      "updates": 13,
-                      "fields": ["pbl"]
-                    }
 
     if university == "University of Newcastle Y2 2026":
         uni_format = {"preset": "University of Newcastle Y2 2026",
@@ -42,6 +25,7 @@ def format_selection(university):
                       "session": 11,
                       "staff": 12,
                       "updates": 13,
+                      "default_zoom": "https://uonewcastle.zoom.us/j/89060830849",
                       "fields": ["pbl"]
                     }
 
@@ -62,6 +46,7 @@ def format_selection(university):
                       "session": 7,
                       "staff": 11,
                       "updates": 12,
+                      "default_zoom": "https://uonewcastle.zoom.us/j/89060830849",
                       "fields": ["pbl", "clin", "comm"]
                       }
     return uni_format
@@ -71,6 +56,13 @@ def main_ui():
 
     st.title("JMPCalendarConverter")
     st.text("Works well enough for now, I'm still ironing out bugs. Lmk if you notice anything @photogrudesh.")
+    with st.status("What's new"):
+        st.write("Removed custom mode cause lowkey who is even bothered.")
+        st.write("Add default zoom link to events with failed hyperlink extraction.")
+        st.write("Tidy up redundant code")
+        st.write("This message 😱")
+        st.write("Toast notification on completion")
+        st.write("Balloon 🎈")
 
     st.divider()
 
@@ -96,94 +88,24 @@ def main_ui():
 
     file_select, file_dl = st.columns([5, 2])
 
+    if university == "Use your own file":
+        file = st.file_uploader("Upload your own calendar file", type=None, accept_multiple_files=False)
+        uni_format_select = st.radio("Format",
+                                     ["University of Newcastle Y2 2026", "University of New England Y2 2026"],
+                                     horizontal=True)
+
+        uni_format = format_selection(uni_format_select)
+
     with file_select:
         if uni_format:
             if uni_format["uni"] == "UON":
                 file = st.selectbox("uon_file", uoncals, label_visibility="collapsed")
             elif uni_format["uni"] == "UNE":
                 file = st.selectbox("une_file", unecals, label_visibility="collapsed")
-    with file_dl:
-        if file:
-            # st.download_button("Download spreadsheet", data=file, file_name=file, use_container_width=True)
-            pass
+
 
     valid_custom = True
 
-    if university == "Use your own file":
-        file = st.file_uploader("Upload your own calendar file", type=None, accept_multiple_files=False)
-        uni_format_select = st.radio("Format",
-                              ["University of Newcastle Y2 2026", "University of New England Y2 2026", "custom"], horizontal=True)
-        if uni_format_select == "custom":
-            st.text("Be careful with these settings. If they're not perfect, your calendar will not convert. Enter the column that correlates with each attribute. Starting at 0 for A, left to right. Then set your title row. This is the row which contains the headings for each column. This number lines up exactly with Excel.")
-            uni_format = {
-             "preset": None,
-             "uni": None,
-             "day": None,
-             "date": None,
-             "time": None,
-             "campus": None,
-             "campus_code": None,
-             "group": None,
-             "venue": None,
-             "attendance": None,
-             "type": None,
-             "domain": None,
-             "session": None,
-             "staff": None,
-             "updates": None,
-             "fields": None
-             }
-
-            col_cust1, col_cust2, col_cust3, col_cust4, col_cust5, col_cust6 = st.columns(6)
-
-            try:
-                with col_cust1:
-                    uni_format["day"] =  st.selectbox("day", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-                    uni_format["date"] = st.selectbox("date", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-                with col_cust2:
-                    uni_format["time"] =  st.selectbox("time", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-                    uni_format["campus"] = st.selectbox("campus", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-                with col_cust3:
-                    uni_format["group"] =  st.selectbox("group", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-                    uni_format["venue"] = st.selectbox("venue", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-                with col_cust4:
-                    uni_format["attendance"] =  st.selectbox("attendance", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-                    uni_format["type"] = st.selectbox("type", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-                with col_cust5:
-                    uni_format["domain"] =  st.selectbox("domain", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-                    uni_format["session"] = st.selectbox("session", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-                with col_cust6:
-                    uni_format["staff"] =  st.selectbox("staff", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-                    uni_format["updates"] = st.selectbox("updates", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-            except ValueError:
-                st.error("Please enter a number")
-
-            uni_format['fields'] = st.segmented_control("Pick the groups that apply to your semester", ["pbl", "clin", "comm"], selection_mode="multi")
-
-            uni_format['uni'] = st.radio("Select your uni", ["UON", "UNE"], horizontal=True)
-
-            if uni_format['uni'] == "UON":
-                uni_format['campus_code'] = st.text_input(
-                    "Enter the campus you go to as shown on the spreadsheet. e.g. CAL/CC or Callaghan/Central Coast.")
-
-            # verify_columns = st.button("Press to verify that your column settings are correct")
-
-            st.info(f"Your settings right now:\n{uni_format}")
-
-            if uni_format['day'] == 20:
-                if os.path.exists("log.jccl"):
-                    f = open("log.jccl", "r")
-                    st.download_button("Download log file", data=f, file_name="log.jccl", use_container_width=True)
-                else:
-                    st.error("log not found")
-
-            if uni_format['fields']:
-                pass
-            else:
-                st.error("Fill your settings correctly")
-                valid_custom = False
-        else:
-            uni_format = format_selection(uni_format_select)
 
     date_start, date_end = None, None
 
@@ -283,9 +205,6 @@ def main_ui():
         if go and valid_selection:
             saved = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws)
             converted = generate_cal(saved, date_start, date_end, uni_format)
-            with open("log.jccl", "w") as l:
-                log = f"{datetime.datetime.now()}: {uni_format['uni']} Calendar converted PBL: {pbl} clin: {clin} comm: {comm}\n\n"
-                l.write(log)
 
             if os.path.exists("calendar.ics"):
                 f = open("calendar.ics", "r")
@@ -294,6 +213,8 @@ def main_ui():
 
                 st.text(
                     f"Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. {converted} events were converted by the converter. If google calendar doesn't import the same number of events, check the spreadsheet. DM me @photogrudesh on Instagram if there are any issues.")
+                st.toast("Calendar converted", icon="🥳")
+                st.balloons()
 
 
 
@@ -396,7 +317,7 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
                 print(i[uni_format["venue"]])
             except AttributeError:
                 print(f"No link for {i}")
-                i[uni_format["venue"]] = str(i[uni_format["venue"]]) + ": Failed hyperlink extraction. Check spreadsheet."
+                i[uni_format["venue"]] = str(f"{uni_format["default_zoom"]}\n" + i[uni_format["venue"]]) + f": Failed hyperlink extraction. Default JMP zoom added instead. Check spreadsheet/canvas."
 
         if uni_format["preset"] == "University of Newcastle Y2 2026":
             campus_code = None
