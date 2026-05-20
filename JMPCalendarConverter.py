@@ -93,8 +93,8 @@ def main_ui():
                                      horizontal=True)
 
         uni_format = format_selection(uni_format_select)
-
-    uni_format = format_selection(university)
+    else:
+        uni_format = format_selection(university)
 
     with file_select:
         if uni_format:
