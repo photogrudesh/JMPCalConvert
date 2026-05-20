@@ -84,8 +84,6 @@ def main_ui():
             elif f.startswith("UNEARM"):
                 unecals.append(f)
 
-    uni_format = format_selection(university)
-
     file_select, file_dl = st.columns([5, 2])
 
     if university == "Use your own file":
@@ -96,13 +94,14 @@ def main_ui():
 
         uni_format = format_selection(uni_format_select)
 
-    if not st.toggle("Use your own file"):
-        with file_select:
-            if uni_format:
-                if uni_format["uni"] == "UON":
-                    file = st.selectbox("uon_file", uoncals, label_visibility="collapsed")
-                elif uni_format["uni"] == "UNE":
-                    file = st.selectbox("une_file", unecals, label_visibility="collapsed")
+    uni_format = format_selection(university)
+
+    with file_select:
+        if uni_format:
+            if uni_format["uni"] == "UON":
+                file = st.selectbox("uon_file", uoncals, label_visibility="collapsed")
+            elif uni_format["uni"] == "UNE":
+                file = st.selectbox("une_file", unecals, label_visibility="collapsed")
 
 
     valid_custom = True
