@@ -213,7 +213,7 @@ def main_ui():
 
                 st.text(
                     f"Import this file to your calendar app (google calendar works idk about the rest)\nAlways double check to see if events have been imported correctly. {converted} events were converted by the converter. If google calendar doesn't import the same number of events, check the spreadsheet. DM me @photogrudesh on Instagram if there are any issues.")
-                st.toast("Calendar converted", icon="🥳")
+                st.toast("Calendar converted, scroll down to download", icon="🥳")
                 st.balloons()
 
 
