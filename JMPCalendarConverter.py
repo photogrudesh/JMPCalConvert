@@ -314,9 +314,7 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
                 if uni_format["preset"] == "University of New England Y2 2026":
                     zoom_col = 7
                 i[uni_format["venue"]] = ws.cell(row=row_num, column=zoom_col).hyperlink.target
-                print(i[uni_format["venue"]])
             except AttributeError:
-                print(f"No link for {i}")
                 i[uni_format["venue"]] = str(f"{uni_format["default_zoom"]}\n" + i[uni_format["venue"]]) + f": Failed hyperlink extraction. Default JMP zoom added instead. Check spreadsheet/canvas."
 
         if uni_format["preset"] == "University of Newcastle Y2 2026":
