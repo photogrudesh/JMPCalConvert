@@ -382,7 +382,7 @@ def highlight_selected_rows(df, rows):
 def xlxs_preview(file, rows):
     df = pd.read_excel(file)
     # st.dataframe(df, use_container_width=True)
-    st.dataframe(highlight_selected_rows(df, rows), use_container_width=True)
+    st.dataframe(df.iloc[rows[0]:], highlight_selected_rows(df, rows), use_container_width=True)
 
 
 def generate_cal(events, date_start, date_end, uni_format):
