@@ -218,7 +218,7 @@ def main_ui():
         else:
             st.warning(f"Select your timetable.")
 
-        if preview and valid_selection:
+        if preview and valid_selection and pbl:
             rows_kept = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws, True, date_start, date_end)
             xlxs_preview(file, rows_kept)
 
