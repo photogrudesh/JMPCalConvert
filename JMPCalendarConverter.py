@@ -372,14 +372,9 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws, preview, date_start, d
 
 
 def highlight_selected_rows(df, rows):
-    rows2 = []
-    for r in rows:
-        rows2.append(r - rows[0])
-
-    rows2 = set(rows2)
-
+    rows = set(rows)
     return df.style.apply(
-        lambda row: ["background-color: #fff3b0"] * len(row) if row.name in rows2 else [""] * len(row),
+        lambda row: ["background-color: #fff3b0"] * len(row) if row.name in rows else [""] * len(row),
         axis=1,
     )
 
@@ -387,7 +382,7 @@ def highlight_selected_rows(df, rows):
 def xlxs_preview(file, rows):
     df = pd.read_excel(file)
     # st.dataframe(df, use_container_width=True)
-    st.dataframe(df.iloc[rows[0]:], highlight_selected_rows(df, rows), use_container_width=True)
+    st.dataframe(highlight_selected_rows(df.iloc[rows[0]:], rows), use_container_width=True)
 
 
 def generate_cal(events, date_start, date_end, uni_format):
