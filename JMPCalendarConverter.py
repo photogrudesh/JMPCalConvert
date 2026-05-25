@@ -142,7 +142,7 @@ def main_ui():
 
         if option == "All events":
             date_start = datetime.date(1970, 1, 1)
-            date_end = datetime.date(3000, 1, 1)
+            date_end = datetime.date(2099, 1, 1)
         elif option == "Events after date":
             with column1:
                 date_start = st.date_input("Date to import from (inclusive)", value="today", min_value=None,
