@@ -364,7 +364,7 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws, preview, date_start, d
             try:
                 if date_start - datetime.timedelta(days=1) < i[uni_format["date"]].date() < date_end + datetime.timedelta(days=1):
                     rows_kept.append(row_num - 2)
-                    st.write(i[uni_format["date"]])
+                    st.write(i[uni_format["date"]], date_start, date_end)
             except AttributeError:
                 preview_error = True
 
