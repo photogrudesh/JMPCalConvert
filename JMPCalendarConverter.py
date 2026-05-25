@@ -148,7 +148,7 @@ def main_ui():
                 date_start = st.date_input("Date to import from (inclusive)", value="today", min_value=None,
                                            max_value=None,
                                            format="DD/MM/YYYY", key="dsi")
-                date_end = datetime.date(3000, 1, 1)
+                date_end = datetime.date(2099, 1, 1)
 
         elif option == "Custom dates":
             with column1:
