@@ -143,13 +143,13 @@ def main_ui():
             pbl = controller.get('pbl')
             clin = controller.get('clin')
             comm = controller.get('comm')
-            print("hi")
+            st.write("hi")
         except AttributeError:
             campus = None
             pbl = None
             clin = None
             comm = None
-            print("hi :(")
+            st.write("hi :(")
 
 
         column1, column2 = st.columns(2)
