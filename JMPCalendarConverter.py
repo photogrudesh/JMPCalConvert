@@ -354,7 +354,7 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws, preview):
         if keep:
             if not preview:
                 saved.append(i)
-            rows_kept.append(row_num)
+            rows_kept.append(row_num - 2)
 
         row_num += 1
 
