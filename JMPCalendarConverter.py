@@ -224,8 +224,9 @@ def main_ui():
 
 
         if go and valid_selection:
-            saved = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws, False)
+            saved, rows_kept = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws, False)
             converted = generate_cal(saved, date_start, date_end, uni_format)
+            xlxs_preview(file, rows_kept)
 
             if os.path.exists("calendar.ics"):
                 f = open("calendar.ics", "r")
@@ -363,7 +364,7 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws, preview):
     if preview:
         return rows_kept
     else:
-        return saved
+        return saved, rows_kept
 
 
 def highlight_selected_rows(df, rows):
