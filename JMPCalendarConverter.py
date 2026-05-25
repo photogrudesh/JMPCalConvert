@@ -209,7 +209,7 @@ def main_ui():
 
 
         if valid_selection and pbl:
-            pre_col, go_col = st.columns([3, 2])
+            pre_col, go_col = st.columns([1, 4])
             with pre_col:
                 preview = st.button("Preview", use_container_width=True)
             with go_col:
