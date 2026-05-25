@@ -372,9 +372,14 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws, preview, date_start, d
 
 
 def highlight_selected_rows(df, rows):
-    rows = set(rows)
+    rows2 = []
+    for r in rows:
+        rows2.append(r - rows[0])
+
+    rows2 = set(rows2)
+
     return df.style.apply(
-        lambda row: ["background-color: #fff3b0"] * len(row) if row.name - rows[0] in rows else [""] * len(row),
+        lambda row: ["background-color: #fff3b0"] * len(row) if row.name in rows2 else [""] * len(row),
         axis=1,
     )
 
