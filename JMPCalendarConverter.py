@@ -59,6 +59,8 @@ def main_ui():
     st.title("JMPCalendarConverter")
     st.text("Works well enough for now, I'm still ironing out bugs. Lmk if you notice anything @photogrudesh.")
     with st.status("What's new"):
+        st.write("Added spreadsheet preview to see detected events")
+        st.write("Added spreadsheet downloads")
         st.write("Removed custom mode cause lowkey who is even bothered.")
         st.write("Add default zoom link to events with failed hyperlink extraction.")
         st.write("Tidy up redundant code")
@@ -374,8 +376,8 @@ def highlight_selected_rows(df, rows):
 
 def xlxs_preview(file, rows):
     df = pd.read_excel(file)
-    st.dataframe(df, use_container_width=True)
-    st.dataframe(highlight_selected_rows(df, rows))
+    # st.dataframe(df, use_container_width=True)
+    st.dataframe(highlight_selected_rows(df, rows), use_container_width=True)
 
 
 def generate_cal(events, date_start, date_end, uni_format):
