@@ -104,9 +104,10 @@ def main_ui():
         with file_dl:
             with open(file, "rb") as f:
                 st.download_button(
-                    label="Download",
+                    label="Download spreadsheet",
                     data=f,
                     file_name=file,
+                    width="stretch",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
 
