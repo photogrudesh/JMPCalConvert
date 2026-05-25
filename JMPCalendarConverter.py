@@ -391,6 +391,11 @@ def xlxs_preview(file, rows):
     df = pd.read_excel(file)
     # st.dataframe(df, use_container_width=True)
     st.dataframe(highlight_selected_rows(df.iloc[rows[0]:], rows), use_container_width=True)
+    if len(rows) == 1:
+        st.success(f"1 relevant event will be converted.")
+
+    else:
+        st.success(f"{len(rows)} relevant events will be converted.")
 
 
 def generate_cal(events, date_start, date_end, uni_format):
