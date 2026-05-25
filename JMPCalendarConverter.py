@@ -8,11 +8,6 @@ import parsedatetime as pdt
 import re
 import pandas as pd
 
-from streamlit_cookies_controller import CookieController
-
-controller = CookieController()
-
-
 
 def format_selection(university):
     uni_format = None
@@ -138,26 +133,10 @@ def main_ui():
 
         option = st.radio("Convert", ["All events", "Events after date", "Custom dates"], horizontal=True)
 
-        try:
-            campus = controller.get('campus')
-            pbl = controller.get('pbl')
-            clin = controller.get('clin')
-            comm = controller.get('comm')
-
-            if pbl == "z":
-                pbl = None
-            if clin == "z":
-                clin = None
-            if comm == "z":
-                comm = None
-
-        except AttributeError:
-            campus = None
-            pbl = None
-            clin = None
-            comm = None
-            st.write("values not saved")
-
+        campus = None
+        pbl = None
+        clin = None
+        comm = None
 
         column1, column2 = st.columns(2)
 
@@ -183,24 +162,24 @@ def main_ui():
 
 
         if uni_format["uni"] == "UON":
-            campus = st.selectbox("Campus", ["Callaghan", "Central Coast"], index=campus)
+            campus = st.selectbox("Campus", ["Callaghan", "Central Coast"])
 
         colpbl, colclin, colcomm = st.columns(3)
 
         if not st.toggle("Manual entry"):
             with colpbl:
                 if "pbl" in uni_format["fields"]:
-                    pbl = st.selectbox("PBL group", ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"), index=pbl, placeholder="Select PBL group")
+                    pbl = st.selectbox("PBL group", ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"), index=None, placeholder="Select PBL group")
                 else:
                     pbl = "z"
             with colclin:
                 if "clin" in uni_format["fields"]:
-                    clin = st.selectbox("Clin group", ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"), index=clin, placeholder="Select clin group")
+                    clin = st.selectbox("Clin group", ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"), index=None, placeholder="Select clin group")
                 else:
                     clin = "300"
             with colcomm:
                 if "comm" in uni_format["fields"]:
-                    comm = st.selectbox("Comm group", ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"), index=comm, placeholder="Select comm group")
+                    comm = st.selectbox("Comm group", ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"), index=None, placeholder="Select comm group")
                 else:
                     comm = "z"
         else:
@@ -230,18 +209,9 @@ def main_ui():
 
 
         if valid_selection and pbl:
-            pre_col, save_col, go_col = st.columns([1, 3, 4])
+            pre_col, go_col = st.columns([1, 4])
             with pre_col:
                 preview = st.button("Preview", use_container_width=True)
-            with save_col:
-                save_to_browser = st.button("Save settings to browser", use_container_width=True)
-
-            if save_to_browser:
-                controller.set('pbl', pbl)
-                controller.set('campus', campus)
-                controller.set('clin', clin)
-                controller.set('comm', comm)
-
             with go_col:
                 go = st.button("Start converting", use_container_width=True)
             st.text("Always check the output below for errors and double check calendar events with the spreadsheet on canvas. Scroll down to download the file when it's ready.")
