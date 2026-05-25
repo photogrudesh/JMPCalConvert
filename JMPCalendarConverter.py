@@ -375,7 +375,7 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws, preview, date_start, d
 def highlight_selected_rows(df, rows):
     rows = set(rows)
     return df.style.apply(
-        lambda row: ["background-color: #fff3b0", "text-color: #000000"] * len(row) if row.name in rows else [""] * len(row),
+        lambda row: ["background-color: #fff3b0"] * len(row) if row.name in rows else [""] * len(row),
         axis=1,
     )
 
