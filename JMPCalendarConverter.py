@@ -221,12 +221,12 @@ def main_ui():
         if valid_selection and pbl:
             if preview:
                 rows_kept = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws, True, date_start, date_end)
-                xlxs_preview(file, rows_kept)
+                xlsx_preview(file, rows_kept)
 
 
         if go and valid_selection:
             saved, rows_kept = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws, False, date_start, date_end)
-            xlxs_preview(file, rows_kept)
+            xlsx_preview(file, rows_kept)
 
             converted = generate_cal(saved, date_start, date_end, uni_format)
 
@@ -387,7 +387,7 @@ def highlight_selected_rows(df, rows):
     )
 
 
-def xlxs_preview(file, rows):
+def xlsx_preview(file, rows):
     df = pd.read_excel(file)
     # st.dataframe(df, use_container_width=True)
     st.dataframe(highlight_selected_rows(df.iloc[rows[0]:], rows), use_container_width=True)
