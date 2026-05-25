@@ -225,11 +225,12 @@ def main_ui():
                 preview = st.button("Preview", use_container_width=True)
             with save_col:
                 save_to_browser = st.button("Save settings to browser", use_container_width=True)
-                if save_to_browser:
-                    controller.set('pbl', pbl)
-                    controller.set('campus', campus)
-                    controller.set('clin', clin)
-                    controller.set('comm', comm)
+
+            if save_to_browser:
+                controller.set('pbl', pbl)
+                controller.set('campus', campus)
+                controller.set('clin', clin)
+                controller.set('comm', comm)
 
 
             with go_col:
