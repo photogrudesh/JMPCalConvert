@@ -144,8 +144,6 @@ def main_ui():
             clin = controller.get('clin')
             comm = controller.get('comm')
 
-            if campus == "z":
-                campus = None
             if pbl == "z":
                 pbl = None
             if clin == "z":
