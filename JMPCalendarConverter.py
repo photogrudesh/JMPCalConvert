@@ -6,6 +6,8 @@ from icalendar import Calendar, Event
 import datetime
 import parsedatetime as pdt
 import re
+import pandas as pd
+
 
 def format_selection(university):
     uni_format = None
@@ -205,13 +207,22 @@ def main_ui():
 
 
         if valid_selection and pbl:
-            go = st.button("Start converting", use_container_width=True)
+            pre_col, go_col = st.columns([3, 2])
+            with pre_col:
+                preview = st.button("Preview", use_container_width=True)
+            with go_col:
+                go = st.button("Start converting", use_container_width=True)
             st.text("Always check the output below for errors and double check calendar events with the spreadsheet on canvas. Scroll down to download the file when it's ready.")
         else:
             st.warning(f"Select your timetable.")
 
+        if preview and valid_selection:
+            rows_kept = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws, True)
+            xlxs_preview(file, rows_kept)
+
+
         if go and valid_selection:
-            saved = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws)
+            saved = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws, False)
             converted = generate_cal(saved, date_start, date_end, uni_format)
 
             if os.path.exists("calendar.ics"):
@@ -226,9 +237,10 @@ def main_ui():
 
 
 
-def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
+def process_xlsx(pbl, clin, comm, uni_format, campus, ws, preview):
     events = []
     saved = []
+    rows_kept = []
 
     row_num = 1
 
@@ -340,9 +352,30 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws):
                 keep = False
 
         if keep:
-            saved.append(i)
+            if not preview:
+                saved.append(i)
+            rows_kept.append(row_num)
+
         row_num += 1
-    return saved
+
+    if preview:
+        return rows_kept
+    else:
+        return saved
+
+
+def highlight_selected_rows(df, rows):
+    rows = set(rows)
+    return df.style.apply(
+        lambda row: ["background-color: #fff3b0"] * len(row) if row.name in rows else [""] * len(row),
+        axis=1,
+    )
+
+
+def xlxs_preview(file, rows):
+    df = pd.read_excel(file)
+    st.dataframe(df, use_container_width=True)
+    st.dataframe(highlight_selected_rows(df, rows))
 
 
 def generate_cal(events, date_start, date_end, uni_format):
@@ -399,6 +432,7 @@ def generate_cal(events, date_start, date_end, uni_format):
     with open("calendar.ics", "wb") as f:
         f.write(cal.to_ical())
     return converted
+
 
 
 def convert_datetime(date, time):
