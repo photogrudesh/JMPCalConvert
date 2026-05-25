@@ -246,6 +246,7 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws, preview, date_start, d
     events = []
     saved = []
     rows_kept = []
+    preview_error = False
 
     row_num = 1
 
@@ -360,11 +361,17 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws, preview, date_start, d
             if not preview:
                 saved.append(i)
 
-            if date_start - datetime.timedelta(days=1) < i[uni_format["date"]].date() < date_end + datetime.timedelta(
-                    days=1):
-                rows_kept.append(row_num - 2)
+            try:
+                if date_start - datetime.timedelta(days=1) < i[uni_format["date"]].date() < date_end + datetime.timedelta(
+                        days=1):
+                    rows_kept.append(row_num - 2)
+            except AttributeError:
+                preview_error = True
 
         row_num += 1
+
+    if preview_error:
+        st.warning("Preview may not be accurate. Download the spreadsheet to double check events.")
 
     if preview:
         return rows_kept
