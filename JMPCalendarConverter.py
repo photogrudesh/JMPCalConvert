@@ -8,6 +8,11 @@ import parsedatetime as pdt
 import re
 import pandas as pd
 
+from streamlit_cookies_controller import CookieController
+
+controller = CookieController()
+
+
 
 def format_selection(university):
     uni_format = None
@@ -133,10 +138,16 @@ def main_ui():
 
         option = st.radio("Convert", ["All events", "Events after date", "Custom dates"], horizontal=True)
 
-        campus = None
-        pbl = None
-        clin = None
-        comm = None
+        try:
+            campus = controller.get('campus')
+            pbl = controller.get('pbl')
+            clin = controller.get('clin')
+            comm = controller.get('comm')
+        except AttributeError:
+            campus = None
+            pbl = None
+            clin = None
+            comm = None
 
         column1, column2 = st.columns(2)
 
@@ -209,9 +220,18 @@ def main_ui():
 
 
         if valid_selection and pbl:
-            pre_col, go_col = st.columns([1, 4])
+            pre_col, save_col, go_col = st.columns([1, 3, 4])
             with pre_col:
                 preview = st.button("Preview", use_container_width=True)
+            with save_col:
+                save_to_browser = st.button("Save settings to browser", use_container_width=True)
+                if save_to_browser:
+                    controller.set('pbl', pbl)
+                    controller.set('campus', campus)
+                    controller.set('clin', clin)
+                    controller.set('comm', comm)
+
+
             with go_col:
                 go = st.button("Start converting", use_container_width=True)
             st.text("Always check the output below for errors and double check calendar events with the spreadsheet on canvas. Scroll down to download the file when it's ready.")
