@@ -144,12 +144,13 @@ def main_ui():
             clin = controller.get('clin')
             comm = controller.get('comm')
             st.write("hi")
+            all_cookies = controller.getAll()
+            st.write(all_cookies)
         except AttributeError:
             campus = None
             pbl = None
             clin = None
             comm = None
-            st.write("hi :(")
 
 
         column1, column2 = st.columns(2)
@@ -234,10 +235,6 @@ def main_ui():
                 controller.set('campus', campus)
                 controller.set('clin', clin)
                 controller.set('comm', comm)
-
-                all_cookies = controller.getAll()
-                print(all_cookies)
-
 
             with go_col:
                 go = st.button("Start converting", use_container_width=True)
