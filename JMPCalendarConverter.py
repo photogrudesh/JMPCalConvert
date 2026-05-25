@@ -219,12 +219,12 @@ def main_ui():
             st.warning(f"Select your timetable.")
 
         if preview and valid_selection:
-            rows_kept = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws, True)
+            rows_kept = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws, True, date_start, date_end)
             xlxs_preview(file, rows_kept)
 
 
         if go and valid_selection:
-            saved, rows_kept = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws, False)
+            saved, rows_kept = process_xlsx(pbl.upper(), clin, comm, uni_format, campus, ws, False, date_start, date_end)
             xlxs_preview(file, rows_kept)
 
             converted = generate_cal(saved, date_start, date_end, uni_format)
@@ -241,7 +241,7 @@ def main_ui():
 
 
 
-def process_xlsx(pbl, clin, comm, uni_format, campus, ws, preview):
+def process_xlsx(pbl, clin, comm, uni_format, campus, ws, preview, date_start, date_end):
     events = []
     saved = []
     rows_kept = []
@@ -358,7 +358,10 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws, preview):
         if keep:
             if not preview:
                 saved.append(i)
-            rows_kept.append(row_num - 2)
+
+            if date_start - datetime.timedelta(days=1) < i[uni_format["date"]].date() < date_end + datetime.timedelta(
+                    days=1):
+                rows_kept.append(row_num - 2)
 
         row_num += 1
 
