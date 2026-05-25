@@ -101,6 +101,14 @@ def main_ui():
                     file = st.selectbox("uon_file", uoncals, label_visibility="collapsed")
                 elif uni_format["uni"] == "UNE":
                     file = st.selectbox("une_file", unecals, label_visibility="collapsed")
+        with file_dl:
+            with open(file, "rb") as f:
+                st.download_button(
+                    label="Download",
+                    data=f,
+                    file_name=file,
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
 
 
     valid_custom = True
