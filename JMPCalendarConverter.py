@@ -232,8 +232,8 @@ def main_ui():
                 controller.set('clin', clin)
                 controller.set('comm', comm)
 
-            all_cookies = controller.getAll()
-            print(all_cookies)
+                all_cookies = controller.getAll()
+                print(all_cookies)
 
 
             with go_col:
