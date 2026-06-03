@@ -71,7 +71,7 @@ def main_ui():
     st.divider()
 
     if not st.toggle("Use your own file"):
-        university = st.selectbox("Preset calendar - Year 2 only rn", ["University of Newcastle Y2 2026", "University of New England Y2 2026"])
+        university = st.selectbox("Preset calendar - Year 2 only rn - DM @photogrudesh if this is outdated.", ["University of Newcastle Y2 2026", "University of New England Y2 2026"])
     else:
         university = "Use your own file"
 
