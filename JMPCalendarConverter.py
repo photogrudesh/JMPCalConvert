@@ -408,15 +408,16 @@ def generate_cal(events, date_start, date_end, uni_format):
         for i in events:
             try:
                 if i[uni_format["date"]] is str:
-                    i[uni_format["date"]] = datetime.datetime.strptime(i[uni_format["date"]], "%Y-%m-%d")
+                    event_date = datetime.datetime.strptime(i[uni_format["date"]], "%d-%m-%Y")
+                else:
+                    event_date = i[uni_format["date"]]
 
-
-                if date_start - datetime.timedelta(days=1) < i[uni_format["date"]].date() < date_end + datetime.timedelta(days=1):
+                if date_start - datetime.timedelta(days=1) < event_date.date() < date_end + datetime.timedelta(days=1):
                     event = Event()
                     no_time = False
 
                     try:
-                        start, end = convert_datetime(i[uni_format["date"]], i[uni_format["time"]])
+                        start, end = convert_datetime(event_date, i[uni_format["time"]])
                         event.add('dtstart', start)
                         event.add('dtend', end)
                     except TypeError:
@@ -430,8 +431,8 @@ def generate_cal(events, date_start, date_end, uni_format):
                     desc = f"{i[uni_format["type"]]}: {i[uni_format["domain"]]}\n{i[uni_format["venue"]]}\nStudents: {i[uni_format["group"]]}\nAttendance: {attendance}\nStaff: {i[uni_format["staff"]]}\nUpdates: {i[uni_format["updates"]]}"
 
                     if no_time:
-                        event.add('dtstart', i[uni_format["date"]])
-                        event.add('dtend', i[uni_format["date"]] + datetime.timedelta(days=1))
+                        event.add('dtstart', event_date)
+                        event.add('dtend', event_date + datetime.timedelta(days=1))
 
                     summary = i[uni_format["session"]]
 
