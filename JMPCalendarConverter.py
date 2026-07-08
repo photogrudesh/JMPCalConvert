@@ -408,7 +408,8 @@ def generate_cal(events, date_start, date_end, uni_format):
         for i in events:
             try:
                 if i[uni_format["date"]] is str:
-                    i[uni_format["date"]] = datetime.datetime.strptime([uni_format["date"]])
+                    i[uni_format["date"]] = datetime.datetime.strptime(i[uni_format["date"]], "%Y-%m-%d")
+
 
                 if date_start - datetime.timedelta(days=1) < i[uni_format["date"]].date() < date_end + datetime.timedelta(days=1):
                     event = Event()
