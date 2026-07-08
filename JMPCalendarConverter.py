@@ -452,6 +452,7 @@ def generate_cal(events, date_start, date_end, uni_format):
             except AttributeError as e:
                 print(e)
                 st.error(f"Something went wrong. Check the spreadsheet for information on {i}\n{e}")
+                st.toast(f"Something went wrong. Add {i} manually.")
 
     with open("calendar.ics", "wb") as f:
         f.write(cal.to_ical())
