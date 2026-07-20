@@ -436,7 +436,7 @@ def generate_cal(events, date_start, date_end, uni_format):
 
                     summary = i[uni_format["session"]]
 
-                    if attendance == "MAND":
+                    if "MAND" in attendance:
                         summary = "M - " + summary.strip()
 
                     event.add('summary', summary)
