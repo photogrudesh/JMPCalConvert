@@ -438,8 +438,10 @@ def generate_cal(events, date_start, date_end, uni_format):
 
                     if "MAND" in attendance:
                         summary = "M - " + summary.strip()
-                    if len(i[uni_format["venue"]]) < 10:
+                    if "zoom" not in i[uni_format["venue"]].lower():
                         summary = summary + f" - {i[uni_format["venue"]].strip()}"
+                    else:
+                        summary = summary + f" - ZOOM"
 
                     event.add('summary', summary)
                     event.add("description", desc)
