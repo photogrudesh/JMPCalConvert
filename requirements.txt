@@ -4,3 +4,4 @@ icalendar
 datetime
 parsedatetime
 streamlit_cookies_controller
+reportlab

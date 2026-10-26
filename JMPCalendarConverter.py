@@ -8,6 +8,12 @@ import hashlib
 import parsedatetime as pdt
 import re
 import pandas as pd
+from xml.sax.saxutils import escape
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import mm
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, KeepTogether, PageBreak
 
 
 def format_selection(university):
@@ -28,6 +34,7 @@ def format_selection(university):
                       "session": 11,
                       "staff": 12,
                       "updates": 13,
+                      "wp_from": "sessions",
                       "default_zoom": "https://uonewcastle.zoom.us/j/89060830849",
                       "fields": ["pbl"]
                     }
@@ -49,6 +56,7 @@ def format_selection(university):
                       "session": 9,
                       "staff": 10,
                       "updates": 11,
+                      "wp_from": "headings",
                       "default_zoom": "https://uonewcastle.zoom.us/j/89060830849",
                       "fields": ["pbl", "clin", "comm"]
                       }
@@ -201,6 +209,8 @@ def main_ui():
                     comm = "z"
 
         previous = None
+        pdf_theme = st.radio("PDF style", ["Light", "Dark"], horizontal=True)
+
         changes_only = st.toggle("Only export changes since my last import")
 
         if changes_only:
@@ -253,7 +263,17 @@ def main_ui():
             if previous:
                 prev_events = load_previous(previous, pbl.upper(), clin, comm, uni_format, campus, date_start, date_end)
 
-            converted = generate_cal(saved, date_start, date_end, uni_format, prev_events)
+            groups = []
+            if "pbl" in uni_format["fields"]:
+                groups.append(f"PBL {pbl.upper()}")
+            if "clin" in uni_format["fields"]:
+                groups.append(f"Clin {clin}")
+            if "comm" in uni_format["fields"]:
+                groups.append(f"Comm {comm.upper()}")
+            if campus:
+                groups.append(campus)
+
+            converted = generate_cal(saved, date_start, date_end, uni_format, prev_events, "  ·  ".join(groups), pdf_theme)
 
             if os.path.exists("calendar.ics"):
                 f = open("calendar.ics", "r")
@@ -271,9 +291,58 @@ def main_ui():
 
                     st.text(
                         f"Import the changes file to your calendar app. {converted} new or changed events were exported. If a changed event shows up twice, delete the old one. Removed events have to be deleted from your calendar yourself. DM me @photogrudesh on Instagram if there are any issues.")
+
+                if os.path.exists("timetable.pdf"):
+                    pdf = open("timetable.pdf", "rb")
+                    st.download_button("Download pdf timetable", data=pdf, file_name="Timetable.pdf", mime="application/pdf", use_container_width=True)
                 st.toast("Calendar converted, scroll down to download", icon="🥳")
                 st.balloons()
 
+
+
+# rows are read 20 columns wide, so the spreadsheet's week label gets tacked on after them
+WEEK_LABEL = 20
+
+
+def spreadsheet_weeks(rows, uni_format):
+    labels = [None] * len(rows)
+
+    if uni_format["wp_from"] == "sessions":
+        # UON has no WP headings, but sessions are named "Open Working Problem 45" etc.
+        # each WP runs from the first day it comes up until the next one starts
+        starts = {}
+        wp_weeks = set()
+        for row in rows:
+            date = row[uni_format["date"]]
+            match = re.search(r"Working Prob\w*\s*(\d+)|WP\s*(\d+)", str(row[uni_format["session"]] or ""), re.I)
+            if isinstance(date, datetime.datetime) and match:
+                number = int(match.group(1) or match.group(2))
+                starts[number] = min(starts.get(number, date), date)
+                wp_weeks.add(date.date() - datetime.timedelta(days=date.weekday()))
+
+        ordered = sorted(starts.items(), key=lambda x: x[1])
+        for n, row in enumerate(rows):
+            date = row[uni_format["date"]]
+            if not isinstance(date, datetime.datetime):
+                continue
+            # weeks with no WP at all (GP placement, vacation) get a plain "Week of" heading
+            if date.date() - datetime.timedelta(days=date.weekday()) not in wp_weeks:
+                continue
+            current = [number for number, start in ordered if start <= date]
+            if current:
+                labels[n] = f"WP {current[-1]}"
+            elif ordered:
+                # the first days of semester come before the first WP opens
+                labels[n] = f"WP {ordered[0][0]}"
+    else:
+        # UNE splits the sheet into sections with a heading row, e.g. "WP 45: Hormones and the Lifecycle"
+        current = None
+        for n, row in enumerate(rows):
+            if row[0] and not row[uni_format["date"]]:
+                current = str(row[0]).strip()
+            labels[n] = current
+
+    return labels
 
 
 def process_xlsx(pbl, clin, comm, uni_format, campus, ws, preview, date_start, date_end):
@@ -287,8 +356,11 @@ def process_xlsx(pbl, clin, comm, uni_format, campus, ws, preview, date_start, d
     for row in ws.iter_rows(min_row=1, max_row=ws.max_row, max_col=20, values_only=True):
         events.append(row)
 
+    week_labels = spreadsheet_weeks(events, uni_format)
+
     for i in events:
         i = list(i)
+        i.append(week_labels[row_num - 1])
         keep = False
         group = str(i[uni_format["group"]]).strip()
         complex_grp = group.split(" ")[-1]
@@ -434,13 +506,14 @@ def xlsx_preview(file, rows):
         st.success(f"{len(rows)} relevant events will be converted.")
 
 
-def generate_cal(events, date_start, date_end, uni_format, previous=None):
+def generate_cal(events, date_start, date_end, uni_format, previous=None, subtitle="", pdf_theme="Light"):
     new_events = build_events(events, date_start, date_end, uni_format)
 
     if previous is None:
         show_events("Importing events...", new_events)
         with open("calendar.ics", "wb") as f:
             f.write(to_ics(new_events))
+        generate_pdf(new_events, uni_format, subtitle, theme=pdf_theme)
         return len(new_events)
 
     added, changed, removed = diff_events(new_events, previous)
@@ -470,6 +543,7 @@ def generate_cal(events, date_start, date_end, uni_format, previous=None):
         f.write(to_ics(exported))
     with open("calendar_full.ics", "wb") as f:
         f.write(to_ics(new_events))
+    generate_pdf(new_events, uni_format, subtitle, (added, changed, removed), pdf_theme)
     return len(exported)
 
 
@@ -599,6 +673,14 @@ def build_events(events, date_start, date_end, uni_format, show_errors=True):
                 event.add("description", desc)
                 event.add('uid', make_uid(uni_format, event_date, i, used_uids))
                 event.add('dtstamp', dtstamp)
+                # plain details for the pdf, so it doesn't have to pick apart the summary
+                event.info = {
+                    "title": str(i[uni_format["session"]] or "").replace("\n", " ").strip(),
+                    "venue": "Zoom" if "zoom" in venue.lower() else venue.replace("\n", " "),
+                    "type": str(i[uni_format["type"]] or "").replace("\n", " ").strip(),
+                    "mandatory": "MAND" in str(attendance),
+                    "week": i[WEEK_LABEL] if len(i) > WEEK_LABEL else None,
+                }
                 built.append(event)
         except (AttributeError, ValueError) as e:
             print(e)
@@ -607,6 +689,297 @@ def build_events(events, date_start, date_end, uni_format, show_errors=True):
                 st.toast(f"Something went wrong. Add {i} manually.", duration="infinite")
 
     return built
+
+
+# every text colour is at least 4.5:1 against every background it sits on in dark mode
+PDF_THEMES = {
+    "Light": {
+        "bg": "#ffffff", "ink": "#1d1d1f", "grey": "#6e6e73", "light_grey": "#86868b",
+        "hairline": "#d2d2d7", "card": "#f5f5f7",
+        "sage": "#5b7b62", "sage_tint": "#eef3ec", "orange": "#b64400", "orange_tint": "#fbf1e8", "red": "#d70015",
+    },
+    "Dark": {
+        "bg": "#161617", "ink": "#f5f5f7", "grey": "#aeaeb2", "light_grey": "#98989d",
+        "hairline": "#3a3a3c", "card": "#232326",
+        "sage": "#9cc0a2", "sage_tint": "#1f2b22", "orange": "#f5a35c", "orange_tint": "#33261b", "red": "#ff6961",
+    },
+}
+
+
+def pdf_styles(t):
+    c = lambda key: colors.HexColor(t[key])
+    return {
+        "eyebrow": ParagraphStyle("eyebrow", fontName="Helvetica-Bold", fontSize=10, leading=14, textColor=c("sage")),
+        "tag": ParagraphStyle("tag", fontName="Helvetica-Bold", fontSize=7.5, leading=10.5),
+        "headline": ParagraphStyle("headline", fontName="Helvetica-Bold", fontSize=40, leading=43, textColor=c("ink")),
+        "sub": ParagraphStyle("sub", fontName="Helvetica", fontSize=13, leading=19, textColor=c("grey")),
+        "stat": ParagraphStyle("stat", fontName="Helvetica-Bold", fontSize=28, leading=32, textColor=c("ink")),
+        "stat_label": ParagraphStyle("stat_label", fontName="Helvetica", fontSize=9, leading=12, textColor=c("grey")),
+        "section": ParagraphStyle("section", fontName="Helvetica-Bold", fontSize=24, leading=28, textColor=c("ink")),
+        "section_sub": ParagraphStyle("section_sub", fontName="Helvetica", fontSize=11, leading=15, textColor=c("grey")),
+        "day_name": ParagraphStyle("day_name", fontName="Helvetica-Bold", fontSize=8, leading=10, textColor=c("light_grey")),
+        "day_num": ParagraphStyle("day_num", fontName="Helvetica-Bold", fontSize=20, leading=23, textColor=c("ink")),
+        "time": ParagraphStyle("time", fontName="Helvetica", fontSize=9, leading=12, textColor=c("grey")),
+        "title": ParagraphStyle("title", fontName="Helvetica-Bold", fontSize=10.5, leading=13.5, textColor=c("ink")),
+        "meta": ParagraphStyle("meta", fontName="Helvetica", fontSize=8.5, leading=11.5, textColor=c("grey")),
+        "card_label": ParagraphStyle("card_label", fontName="Helvetica-Bold", fontSize=10, leading=13),
+        "card_item": ParagraphStyle("card_item", fontName="Helvetica", fontSize=9, leading=12.5, textColor=c("ink")),
+    }
+
+
+def pdf_time(t):
+    return f"{t:%I:%M %p}".lstrip("0").lower()
+
+
+def pdf_day(d):
+    return f"{d:%a} {d.day} {d:%B}"
+
+
+def pdf_when(e):
+    start = e.decoded("dtstart")
+    if isinstance(start, datetime.datetime):
+        return f"{pdf_day(start)}, {pdf_time(start)}"
+    return f"{pdf_day(start)}, all day"
+
+
+def pdf_title(e):
+    if hasattr(e, "info"):
+        return e.info["title"]
+    return str(e.get("summary", "")).replace("\n", " ")
+
+
+def pdf_page(t):
+    def draw(canvas, doc):
+        canvas.saveState()
+        # page background first, so dark mode isn't just dark text boxes on white paper
+        canvas.setFillColor(colors.HexColor(t["bg"]))
+        canvas.rect(0, 0, A4[0], A4[1], stroke=0, fill=1)
+        canvas.setFont("Helvetica", 7.5)
+        canvas.setFillColor(colors.HexColor(t["light_grey"]))
+        canvas.drawString(doc.leftMargin + 6, 12 * mm,
+                          f"Generated {datetime.date.today().day} {datetime.date.today():%B %Y} by JMPCalendarConverter. Always double check against Canvas.")
+        canvas.drawRightString(A4[0] - doc.rightMargin - 6, 12 * mm, str(doc.page))
+        canvas.restoreState()
+    return draw
+
+
+def pdf_changes(changes, width, t, s):
+    added, changed, removed = changes
+    flow = [Paragraph("What's changed.", s["section"]), Spacer(1, 3 * mm),
+            Paragraph("Since the last version you imported. New and changed events are highlighted in the timetable too.", s["section_sub"]),
+            Spacer(1, 7 * mm)]
+
+    if not (added or changed or removed):
+        flow.append(Paragraph("Nothing. You're all up to date.", s["sub"]))
+
+    groups = [
+        ("New", t["sage"], [f"{escape(pdf_when(e))}  ·  <b>{escape(pdf_title(e))}</b>" for e in added]),
+        ("Changed", t["orange"], [f"{escape(pdf_when(new))}  ·  <b>{escape(pdf_title(new))}</b><br/>"
+                                  f"<font color='{t['grey']}'>Was {escape(pdf_when(old))}  ·  {escape(pdf_title(old))}</font>"
+                                  for old, new in changed]),
+        ("Removed", t["red"], [f"<strike>{escape(pdf_when(e))}  ·  {escape(pdf_title(e))}</strike>" for e in removed]),
+    ]
+
+    for label, colour, items in groups:
+        if not items:
+            continue
+        label_style = ParagraphStyle(f"label_{label}", parent=s["card_label"], textColor=colors.HexColor(colour))
+        rows = [[Paragraph(f"{label}  <font color='{t['light_grey']}'>{len(items)}</font>", label_style)]]
+        rows += [[Paragraph(item, s["card_item"])] for item in items]
+        card = Table(rows, colWidths=[width])
+        card.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor(t["card"])),
+            ("ROUNDEDCORNERS", [10, 10, 10, 10]),
+            ("LEFTPADDING", (0, 0), (-1, -1), 6 * mm),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 6 * mm),
+            ("TOPPADDING", (0, 0), (-1, -1), 2.2 * mm),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 2.2 * mm),
+            ("TOPPADDING", (0, 0), (-1, 0), 5 * mm),
+            ("BOTTOMPADDING", (0, -1), (-1, -1), 5 * mm),
+        ]))
+        flow += [card, Spacer(1, 5 * mm)]
+
+    flow.append(PageBreak())
+    return flow
+
+
+def pdf_day_block(day, day_events, width, highlights, t, s):
+    time_w = 24 * mm
+    day_w = 20 * mm
+    pad = 2.5 * mm
+
+    rows = []
+    for e in day_events:
+        start = e.decoded("dtstart")
+        if isinstance(start, datetime.datetime):
+            end = e.decoded("dtend")
+            when = f"{pdf_time(start)}<br/><font color='{t['light_grey']}'>{pdf_time(end)}</font>"
+        else:
+            when = "All day"
+
+        info = e.info
+        meta = "  ·  ".join(escape(x) for x in [info["type"], info["venue"]] if x)
+        if info["mandatory"]:
+            meta = f"<font color='{t['sage']}'><b>Mandatory</b></font>" + (f"  ·  {meta}" if meta else "")
+
+        content = []
+        highlight = highlights.get(str(e.get("uid")))
+        tint = None
+        if highlight:
+            status, old = highlight
+            if status == "new":
+                tint = t["sage_tint"]
+                content.append(Paragraph(f"<font color='{t['sage']}'>NEW</font>", s["tag"]))
+            else:
+                tint = t["orange_tint"]
+                content.append(Paragraph(f"<font color='{t['orange']}'>CHANGED</font>"
+                                         f"<font name='Helvetica' color='{t['grey']}'>  ·  was {escape(pdf_when(old))}</font>", s["tag"]))
+        content.append(Paragraph(escape(info["title"]), s["title"]))
+        if meta:
+            content.append(Paragraph(meta, s["meta"]))
+
+        # every event gets the same padding so highlighted and plain ones line up
+        row = Table([[Paragraph(when, s["time"]), content]], colWidths=[time_w, width - day_w - time_w - 2 * pad])
+        row_style = [
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ]
+        row.setStyle(TableStyle(row_style))
+        card = Table([[row]], colWidths=[width - day_w])
+        card_style = [
+            ("LEFTPADDING", (0, 0), (-1, -1), pad),
+            ("RIGHTPADDING", (0, 0), (-1, -1), pad),
+            ("TOPPADDING", (0, 0), (-1, -1), pad),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), pad),
+        ]
+        if tint:
+            card_style += [("BACKGROUND", (0, 0), (-1, -1), colors.HexColor(tint)), ("ROUNDEDCORNERS", [8, 8, 8, 8])]
+        card.setStyle(TableStyle(card_style))
+        rows.append([card])
+
+    events_table = Table(rows, colWidths=[width - day_w])
+    events_table.setStyle(TableStyle([
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 1 * mm),
+    ]))
+
+    day_cell = [Paragraph(f"{day:%a}".upper(), s["day_name"]), Paragraph(str(day.day), s["day_num"])]
+    block = Table([[day_cell, events_table]], colWidths=[day_w, width - day_w])
+    block.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        # events carry their own padding, so the day number gets it here to stay level with them
+        ("TOPPADDING", (0, 0), (0, 0), 1.5 * mm + pad),
+        ("TOPPADDING", (1, 0), (1, 0), 1.5 * mm),
+        # a day with one event is about as tall as the date, so give the date room before the next divider
+        ("BOTTOMPADDING", (0, 0), (0, 0), 3.5 * mm),
+        ("BOTTOMPADDING", (1, 0), (1, 0), 0.5 * mm),
+        ("LINEABOVE", (0, 0), (-1, 0), 0.5, colors.HexColor(t["hairline"])),
+    ]))
+    return block
+
+
+def generate_pdf(events, uni_format, subtitle, changes=None, theme="Light"):
+    t = PDF_THEMES[theme]
+    s = pdf_styles(t)
+    doc = SimpleDocTemplate("timetable.pdf", pagesize=A4, leftMargin=20 * mm, rightMargin=20 * mm,
+                            topMargin=22 * mm, bottomMargin=22 * mm, title="JMP Timetable", author="JMPCalendarConverter")
+    # the page frame has 6pt of padding each side, tables need to fit inside it to line up with the text
+    width = doc.width - 12
+
+    def event_day(e):
+        start = e.decoded("dtstart")
+        return start.date() if isinstance(start, datetime.datetime) else start
+
+    def event_sort(e):
+        start = e.decoded("dtstart")
+        if not isinstance(start, datetime.datetime):
+            start = datetime.datetime.combine(start, datetime.time.min)
+        return start
+
+    events = sorted(events, key=event_sort)
+    days = sorted({event_day(e) for e in events})
+
+    flow = [Paragraph(escape(uni_format["preset"].replace(" Y2 ", " · Year 2 · ")), s["eyebrow"]),
+            Spacer(1, 4 * mm),
+            Paragraph("Your semester.<br/>All in one place.", s["headline"]),
+            Spacer(1, 6 * mm)]
+    if subtitle:
+        flow.append(Paragraph(escape(subtitle), s["sub"]))
+    if days:
+        flow.append(Paragraph(f"{days[0].day} {days[0]:%B} – {days[-1].day} {days[-1]:%B %Y}", s["sub"]))
+    flow.append(Spacer(1, 12 * mm))
+
+    weeks = sorted({d - datetime.timedelta(days=d.weekday()) for d in days})
+    stats = [(len(events), "sessions"),
+             (sum(1 for e in events if e.info["mandatory"]), "mandatory"),
+             (len(weeks), "weeks")]
+    stats_table = Table([[Paragraph(str(n), s["stat"]) for n, label in stats],
+                         [Paragraph(label, s["stat_label"]) for n, label in stats]],
+                        colWidths=[width / 3] * 3)
+    stats_table.setStyle(TableStyle([
+        ("LINEABOVE", (0, 0), (-1, 0), 0.5, colors.HexColor(t["hairline"])),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, 0), 5 * mm),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 1 * mm),
+    ]))
+    flow += [stats_table, Spacer(1, 14 * mm)]
+
+    if changes is not None:
+        flow += pdf_changes(changes, width, t, s)
+
+    # uid -> ("new", None) or ("changed", old event), to mark them in the timetable
+    highlights = {}
+    if changes is not None:
+        added, changed, removed = changes
+        for e in added:
+            highlights[str(e.get("uid"))] = ("new", None)
+        for old, new in changed:
+            highlights[str(new.get("uid"))] = ("changed", old)
+
+    # sections follow the spreadsheet's working problems in date order. a WP that gets
+    # interrupted (e.g. by GP placement) picks up again afterwards as "continued"
+    sections = []
+    seen = set()
+    for e in events:
+        label = e.info["week"]
+        if not label:
+            monday = event_day(e) - datetime.timedelta(days=event_day(e).weekday())
+            label = f"Week of {monday.day} {monday:%B}"
+        if not sections or sections[-1][0] != label:
+            sections.append((label, [], label in seen))
+            seen.add(label)
+        sections[-1][1].append(e)
+
+    for label, section_events, continued in sections:
+        week_days = sorted({event_day(e) for e in section_events})
+        first, last = week_days[0], week_days[-1]
+        if first == last:
+            when = f"{first.day} {first:%B}"
+        elif first.month == last.month:
+            when = f"{first.day} – {last.day} {last:%B}"
+        else:
+            when = f"{first.day} {first:%B} – {last.day} {last:%B}"
+
+        # "WP 45: Hormones and the Lifecycle" -> "WP 45" with the topic underneath
+        title, sep, topic = re.sub(r"^WP\s*(\d+)", r"WP \1", label).partition(":")
+        sub = "  ·  ".join(x for x in ["continued" if continued else "", topic.strip(), when] if x)
+
+        heading = [Paragraph(escape(title.strip()), s["section"]), Spacer(1, 1.5 * mm),
+                   Paragraph(escape(sub), s["section_sub"]), Spacer(1, 4 * mm)]
+        for i, day in enumerate(week_days):
+            block = pdf_day_block(day, [e for e in section_events if event_day(e) == day], width, highlights, t, s)
+            # keep the heading with its first day so it never sits alone at the bottom of a page
+            flow.append(KeepTogether(heading + [block]) if i == 0 else KeepTogether([block]))
+        flow.append(Spacer(1, 10 * mm))
+
+    doc.build(flow, onFirstPage=pdf_page(t), onLaterPages=pdf_page(t))
 
 
 def make_uid(uni_format, event_date, i, used_uids):
