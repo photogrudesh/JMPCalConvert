@@ -212,11 +212,23 @@ def main_ui():
                     comm = "z"
 
         previous = None
-        pdf_theme = st.radio("PDF style", ["Light", "Dark"], horizontal=True)
+        pdf_theme = "Light"
+        changes_only = False
+        highlight_changes = False
 
-        changes_only = st.toggle("Only export changes since my last import")
+        ics_col, pdf_col = st.columns(2)
+        with ics_col:
+            make_ics = st.toggle("Make calendar file (.ics)", value=True)
+            if make_ics:
+                changes_only = st.toggle("Only export changes since my last import")
+        with pdf_col:
+            make_pdf = st.toggle("Make PDF timetable", value=True)
+            if make_pdf:
+                pdf_theme = st.radio("PDF style", ["Light", "Dark"], horizontal=True)
+                highlight_changes = st.toggle("Highlight changes since my last timetable")
 
-        if changes_only:
+        # both of these compare against whatever the user had last time
+        if changes_only or highlight_changes:
             prev_source = st.radio("Compare against", ["Spreadsheet I used last time", "Calendar file (.ics) I downloaded last time"], horizontal=True)
             if prev_source == "Spreadsheet I used last time":
                 cals = uoncals if uni_format["uni"] == "UON" else unecals
@@ -234,7 +246,8 @@ def main_ui():
         if option == "All events":
             st.text(f"Importing all available events from {file}")
 
-        if clin and comm and pbl and (previous or not changes_only):
+        needs_previous = changes_only or highlight_changes
+        if clin and comm and pbl and (make_ics or make_pdf) and (previous or not needs_previous):
             valid_selection = True
 
         go = False
@@ -247,6 +260,8 @@ def main_ui():
             with go_col:
                 go = st.button("Start converting", use_container_width=True)
             st.text("Always check the output below for errors and double check calendar events with the spreadsheet on canvas. Scroll down to download the file when it's ready.")
+        elif clin and comm and pbl and not (make_ics or make_pdf):
+            st.warning("Pick at least one thing to make.")
         elif clin and comm and pbl:
             st.warning("Pick the spreadsheet or calendar file you used last time.")
         else:
@@ -280,12 +295,13 @@ def main_ui():
             if campus:
                 groups.append(campus)
 
-            converted = generate_cal(saved, date_start, date_end, uni_format, prev_events, "  ·  ".join(groups), pdf_theme)
+            converted = generate_cal(saved, date_start, date_end, uni_format, prev_events, "  ·  ".join(groups), pdf_theme,
+                                     make_ics, make_pdf, changes_only, highlight_changes)
 
             if os.path.exists("calendar.ics"):
                 f = open("calendar.ics", "r")
 
-                if prev_events is None:
+                if not changes_only:
                     st.download_button("Download ics file", data=f, file_name="Calendar.ics", use_container_width=True)
 
                     st.text(
@@ -299,9 +315,11 @@ def main_ui():
                     st.text(
                         f"Import the changes file to your calendar app. {converted} new or changed events were exported. If a changed event shows up twice, delete the old one. Removed events have to be deleted from your calendar yourself. DM me @photogrudesh on Instagram if there are any issues.")
 
-                if os.path.exists("timetable.pdf"):
-                    pdf = open("timetable.pdf", "rb")
-                    st.download_button("Download pdf timetable", data=pdf, file_name="Timetable.pdf", mime="application/pdf", use_container_width=True)
+            if os.path.exists("timetable.pdf"):
+                pdf = open("timetable.pdf", "rb")
+                st.download_button("Download pdf timetable", data=pdf, file_name="Timetable.pdf", mime="application/pdf", use_container_width=True)
+
+            if os.path.exists("calendar.ics") or os.path.exists("timetable.pdf"):
                 st.toast("Calendar converted, scroll down to download", icon="🥳")
                 st.balloons()
 
@@ -513,14 +531,22 @@ def xlsx_preview(file, rows):
         st.success(f"{len(rows)} relevant events will be converted.")
 
 
-def generate_cal(events, date_start, date_end, uni_format, previous=None, subtitle="", pdf_theme="Light"):
+def generate_cal(events, date_start, date_end, uni_format, previous=None, subtitle="", pdf_theme="Light",
+                 make_ics=True, make_pdf=True, changes_only=False, highlight_changes=False):
+    # clear out last run's files so a download button never shows something that wasn't asked for this time
+    for old_file in ["calendar.ics", "calendar_full.ics", "timetable.pdf"]:
+        if os.path.exists(old_file):
+            os.remove(old_file)
+
     new_events = build_events(events, date_start, date_end, uni_format)
 
     if previous is None:
         show_events("Importing events...", new_events)
-        with open("calendar.ics", "wb") as f:
-            f.write(to_ics(new_events))
-        generate_pdf(new_events, uni_format, subtitle, theme=pdf_theme)
+        if make_ics:
+            with open("calendar.ics", "wb") as f:
+                f.write(to_ics(new_events))
+        if make_pdf:
+            generate_pdf(new_events, uni_format, subtitle, theme=pdf_theme)
         return len(new_events)
 
     added, changed, removed = diff_events(new_events, previous)
@@ -544,13 +570,19 @@ def generate_cal(events, date_start, date_end, uni_format, previous=None, subtit
 
     show_events(f"Removed events ({len(removed)}) - delete these from your calendar yourself", removed)
 
-    exported = added + [new for old, new in changed]
-    # calendar.ics gets just the changes, calendar_full.ics is kept to compare against next time
-    with open("calendar.ics", "wb") as f:
-        f.write(to_ics(exported))
-    with open("calendar_full.ics", "wb") as f:
-        f.write(to_ics(new_events))
-    generate_pdf(new_events, uni_format, subtitle, (added, changed, removed), pdf_theme)
+    exported = new_events
+    if make_ics:
+        if changes_only:
+            exported = added + [new for old, new in changed]
+            # calendar.ics gets just the changes, calendar_full.ics is kept to compare against next time
+            with open("calendar_full.ics", "wb") as f:
+                f.write(to_ics(new_events))
+        with open("calendar.ics", "wb") as f:
+            f.write(to_ics(exported))
+
+    # the pdf is always the full timetable, the changes only get marked in it if asked for
+    if make_pdf:
+        generate_pdf(new_events, uni_format, subtitle, (added, changed, removed) if highlight_changes else None, pdf_theme)
     return len(exported)
 
 
