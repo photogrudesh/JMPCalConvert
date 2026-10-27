@@ -1,7 +1,9 @@
 import os
+import zipfile
 
 import streamlit as st
 import openpyxl
+from openpyxl.utils.exceptions import InvalidFileException
 from icalendar import Calendar, Event
 import datetime
 import hashlib
@@ -91,7 +93,8 @@ def main_ui():
     unecals = []
 
     for f in files:
-        if f.endswith(".xlsx"):
+        # skip empty files left behind by a failed upload, they can't be opened
+        if f.endswith(".xlsx") and os.path.getsize(f) > 0:
             if f.startswith("CALCCCS"):
                 uoncals.append(f)
             elif f.startswith("UNEARM"):
@@ -261,7 +264,11 @@ def main_ui():
 
             prev_events = None
             if previous:
-                prev_events = load_previous(previous, pbl.upper(), clin, comm, uni_format, campus, date_start, date_end)
+                try:
+                    prev_events = load_previous(previous, pbl.upper(), clin, comm, uni_format, campus, date_start, date_end)
+                except (zipfile.BadZipFile, ValueError, InvalidFileException) as e:
+                    st.error(f"Couldn't open the file you picked to compare against. Check it's the right file and try again.\n{e}")
+                    st.stop()
 
             groups = []
             if "pbl" in uni_format["fields"]:
